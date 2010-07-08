@@ -33,7 +33,7 @@ module.exports = {
         var fresnel = new Fresnel();
         assert.ok(fresnel instanceof EventEmitter);
     },
-     'should buffer tasks into a local queue': function(assert, beforeExit) {
+    'should buffer tasks into a local queue': function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
         // create some tasks in Redis
@@ -54,7 +54,7 @@ module.exports = {
         beforeExit(function() {
             assert.equal(task.toString(), fresnel.BUFFERED_TASKS[0].toString());
         });
-     },
+    },
     'should mark buffered tasks as pending': function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
