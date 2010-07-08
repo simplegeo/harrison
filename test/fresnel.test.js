@@ -10,9 +10,22 @@ process.addListener('uncaughtException', function(err) {
 
 function randomTask() {
     return {
-        "class": "class:" + new Date().getTime(), // TODO random string helper
+        "class": randomString(),
         "args": []
     };
+}
+
+var CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+function randomString(length) {
+    length = length || 16;
+    var text = "";
+
+    for (var i=0; i < length; i++) {
+        text += CHARACTERS.charAt(Math.floor(Math.random() * CHARACTERS.length));
+    }
+
+    return text;
 }
 
 module.exports = {
@@ -21,7 +34,7 @@ module.exports = {
         assert.ok(fresnel instanceof EventEmitter);
     },
      'should buffer tasks into a local queue': function(assert, beforeExit) {
-        var fresnel = new Fresnel('test:' + new Date().getTime());
+        var fresnel = new Fresnel(randomString());
 
         // create some tasks in Redis
         var task = randomTask();
@@ -43,11 +56,9 @@ module.exports = {
         });
      },
     'should mark buffered tasks as pending': function(assert, beforeExit) {
-        var fresnel = new Fresnel('test:' + new Date().getTime());
+        var fresnel = new Fresnel(randomString());
 
-        console.log("creating tasks");
         fresnel.createTask(randomTask(), function() {
-            console.log("buffering tasks");
             fresnel.bufferTasks(function() {
                 fresnel.getPendingCount(function(count) {
                     try {
