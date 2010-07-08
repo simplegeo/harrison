@@ -70,6 +70,21 @@ module.exports = {
             });
         });
     },
-    'create task adds shaw for uniqueness': function(assert) {
+    'Duplicate tasks should only be inserted once': function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        var task = randomTask();
+
+        fresnel.createTask(task, function() {
+            fresnel.createTask(task, function() {
+                fresnel.getUnbufferedQueueLength(function(length) {
+                    try {
+                        assert.equal(1, length);
+                    } finally {
+                        fresnel.shutdown();
+                    }
+                });
+            });
+        });
     }
 }
