@@ -86,5 +86,16 @@ module.exports = {
                 });
             });
         });
+    },
+    'Locally buffered tasks should be run': function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        fresnel.BUFFERED_TASKS = [randomTask()];
+
+        fresnel.runBufferedTasks();
+
+        beforeExit(function() {
+            assert.equal(0, fresnel.BUFFERED_TASKS.length);
+        });
     }
 }
