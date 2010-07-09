@@ -213,5 +213,28 @@ module.exports = {
         task.id = "1234";
 
         assert.equal(hash, fresnel._hash(task));
-    }
+    },
+    "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var removedKey;
+
+        var task = randomTask();
+
+        replaceClientMethod(fresnel, 'srem', function(key, value, callback) {
+            removedKey = key;
+
+            if (callback) {
+                callback();
+            }
+        });
+
+        fresnel.createTask(task, function() {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.equal(fresnel._namespace("tasks"), removedKey);
+        });
+    },
 }
