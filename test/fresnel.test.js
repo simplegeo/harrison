@@ -3,7 +3,10 @@ var assert = require('assert'),
     redis = require('redis-client'),
     EventEmitter = require('events').EventEmitter;
 
-var Fresnel = require('fresnel').Fresnel;
+var _fresnel = require('fresnel');
+var Fresnel = _fresnel.Fresnel;
+
+_fresnel.AUTO_CLOSE = true;
 
 process.addListener('uncaughtException', function(err) {
     console.log("Caught exception: " + err);
@@ -53,11 +56,7 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel.bufferTasks(function() {
                 fresnel.getUnbufferedQueueLength(function(length) {
-                    try {
-                        assert.equal(0, length);
-                    } finally {
-                        fresnel.shutdown();
-                    }
+                    assert.equal(0, length);
                 });
             });
         });
@@ -72,11 +71,7 @@ module.exports = {
         fresnel.createTask(randomTask(), function() {
             fresnel.bufferTasks(function() {
                 fresnel.getPendingCount(function(count) {
-                    try {
-                        assert.equal(1, count);
-                    } finally {
-                        fresnel.shutdown();
-                    }
+                    assert.equal(1, count);
                 });
             });
         });
@@ -87,26 +82,16 @@ module.exports = {
         fresnel.createTask(randomTask(), function() {
             fresnel.bufferTasks();
         });
-
-        setTimeout(function() {
-            fresnel.shutdown();
-        }, 100);
     },
     'should succeed when no tasks are available to be buffered': function(assert) {
         var fresnel = new Fresnel(randomString());
 
-        fresnel.bufferTasks(function() {
-            fresnel.shutdown();
-        });
+        fresnel.bufferTasks();
     },
     'should succeed when no tasks are available to be buffered and no callback was provided': function(assert) {
         var fresnel = new Fresnel(randomString());
 
         fresnel.bufferTasks();
-
-        setTimeout(function() {
-            fresnel.shutdown();
-        }, 100);
     },
     'Duplicate tasks should only be inserted once': function(assert) {
         var fresnel = new Fresnel(randomString());
@@ -116,11 +101,7 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel.createTask(task, function() {
                 fresnel.getUnbufferedQueueLength(function(length) {
-                    try {
-                        assert.equal(1, length);
-                    } finally {
-                        fresnel.shutdown();
-                    }
+                    assert.equal(1, length);
                 });
             });
         });
@@ -140,10 +121,6 @@ module.exports = {
         var fresnel = new Fresnel(randomString());
 
         fresnel.createTask(randomTask());
-
-        setTimeout(function() {
-            fresnel.shutdown();
-        }, 100);
     },
     "shouldn't fail when creating a duplicate task with no callback": function(assert) {
         var fresnel = new Fresnel(randomString());
@@ -153,10 +130,6 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel.createTask(task);
         });
-
-        setTimeout(function() {
-            fresnel.shutdown();
-        }, 100);
     },
     "should add to the 'tasks' set when creating tasks": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
@@ -168,9 +141,7 @@ module.exports = {
             callback();
         });
         
-        fresnel.createTask(randomTask(), function() {
-            fresnel.shutdown();
-        });
+        fresnel.createTask(randomTask());
 
         beforeExit(function() {
             assert.equal(fresnel._namespace("tasks"), calledWithKey);
@@ -186,9 +157,7 @@ module.exports = {
             callback();
         });
         
-        fresnel.createTask(randomTask(), function() {
-            fresnel.shutdown();
-        });
+        fresnel.createTask(randomTask());
 
         beforeExit(function() {
             assert.equal(fresnel._namespace("queue"), calledWithKey);
@@ -206,9 +175,7 @@ module.exports = {
 
         var task = randomTask();
         
-        fresnel.createTask(task, function() {
-            fresnel.shutdown();
-        });
+        fresnel.createTask(task);
 
         beforeExit(function() {
             assert.equal(fresnel._namespace("tasks:" + task.id), calledWithKey);
