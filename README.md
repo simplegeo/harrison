@@ -136,9 +136,9 @@ TDB
 
 The following actions need to occur on a regular basis:
 
-* draining ready tasks from the reservoir to the main queue
 * buffering waiting tasks into `pending` and Fresnel's local queue
 * running locally buffered tasks
+* draining ready tasks from the reservoir to the main queue
 * moving failed tasks (retry limit exceeded) to `error`
 * collecting metrics
 
