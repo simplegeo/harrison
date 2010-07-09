@@ -70,6 +70,33 @@ module.exports = {
             });
         });
     },
+    'should buffer tasks with no callback': function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        fresnel.createTask(randomTask(), function() {
+            fresnel.bufferTasks();
+        });
+
+        setTimeout(function() {
+            fresnel.shutdown();
+        }, 100);
+    },
+    'should succeed when no tasks are available to be buffered': function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        fresnel.bufferTasks(function() {
+            fresnel.shutdown();
+        });
+    },
+    'should succeed when no tasks are available to be buffered and no callback was provided': function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        fresnel.bufferTasks();
+
+        setTimeout(function() {
+            fresnel.shutdown();
+        }, 100);
+    },
     'Duplicate tasks should only be inserted once': function(assert) {
         var fresnel = new Fresnel(randomString());
 
@@ -97,5 +124,27 @@ module.exports = {
         beforeExit(function() {
             assert.equal(0, fresnel.BUFFERED_TASKS.length);
         });
-    }
+    },
+    'should create tasks with no callback': function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        fresnel.createTask(randomTask());
+
+        setTimeout(function() {
+            fresnel.shutdown();
+        }, 100);
+    },
+    "shouldn't fail when creating a duplicate task with no callback": function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        var task = randomTask();
+
+        fresnel.createTask(task, function() {
+            fresnel.createTask(task);
+        });
+
+        setTimeout(function() {
+            fresnel.shutdown();
+        }, 100);
+    },
 }
