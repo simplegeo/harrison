@@ -112,7 +112,10 @@ module.exports = {
     'Locally buffered tasks should be run': function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        fresnel.BUFFERED_TASKS = [randomTask()];
+        var task = randomTask();
+        task.id = "1234";
+
+        fresnel.BUFFERED_TASKS = [task];
 
         fresnel.runBufferedTasks();
 
@@ -217,12 +220,12 @@ module.exports = {
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var removedKey;
+        var removedKeys = [];
 
         var task = randomTask();
 
         replaceClientMethod(fresnel, 'srem', function(key, value, callback) {
-            removedKey = key;
+            removedKeys.push(key);
         });
 
         fresnel.createTask(task, function() {
@@ -230,7 +233,45 @@ module.exports = {
         });
 
         beforeExit(function() {
-            assert.equal(fresnel._namespace("tasks"), removedKey);
+            assert.ok(removedKeys.indexOf(fresnel._namespace("tasks")) >= 0);
+        });
+    },
+    "when tasks execute successfully, they should be removed from the 'pending' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var removedKeys = [];
+
+        var task = randomTask();
+
+        replaceClientMethod(fresnel, 'srem', function(key, value, callback) {
+            removedKeys.push(key);
+        });
+
+        fresnel.createTask(task, function() {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
+        });
+    },
+    "when tasks execute successfully, their task definition should be removed": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var removedKeys = [];
+
+        var task = randomTask();
+
+        replaceClientMethod(fresnel, 'del', function(key, callback) {
+            removedKeys.push(key);
+        });
+
+        fresnel.createTask(task, function() {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.ok(removedKeys.indexOf(fresnel._namespace("tasks:" + task.id)) >= 0);
         });
     },
 }

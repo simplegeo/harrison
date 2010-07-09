@@ -1,0 +1,141 @@
+diff --git a/fresnel.js b/fresnel.js
+new file mode 100644
+index 0000000..6a974bd
+--- /dev/null
++++ b/fresnel.js
+@@ -0,0 +1,7 @@
++var Fresnel = require('fresnel').Fresnel;
++
++var fresnel = new Fresnel();
++fresnel.getUnbufferedQueueLength(function(length) {
++    console.log("Unbuffered tasks: " + length);
++});
++fresnel.processTasks();
+diff --git a/lib/fresnel.js b/lib/fresnel.js
+index 0254ce2..bcaa6cb 100644
+--- a/lib/fresnel.js
++++ b/lib/fresnel.js
+@@ -3,14 +3,17 @@ var sys = require('sys'),
+     hashlib = require('hashlib'),
+     redis = require('redis-client');
+ 
++exports.BATCH_SIZE = 10;
++exports.BUFFER_INTERVAL = 500;
++exports.EXECUTE_INTERVAL = 100;
+ exports.DEFAULT_NAMESPACE = 'fresnel';
+-exports.BATCH_SIZE = 1;
+ 
+ function Fresnel(namespace) {
+     EventEmitter.call(this);
+ 
+     this.namespace = namespace || exports.DEFAULT_NAMESPACE;
+     this.BUFFERED_TASKS = [];
++    this.INTERVALS = {};
+ }
+ 
+ sys.inherits(Fresnel, EventEmitter);
+@@ -20,6 +23,7 @@ exports.Fresnel = Fresnel;
+  * Buffer tasks from Redis into a local queue and mark them as pending.
+  */
+ Fresnel.prototype.bufferTasks = function(callback) {
++    console.log("Buffering tasks...");
+     var self = this;
+ 
+     self._getClient().zrange(self._namespace("queue"), 0, exports.BATCH_SIZE - 1, function(err, reply) {
+@@ -115,10 +127,17 @@ Fresnel.prototype.getUnbufferedQueueLength = function(callback) {
+     });
+ }
+ 
++Fresnel.prototype.processTasks = function() {
++    this.INTERVALS['bufferTasks'] = setInterval(this._bind(this.bufferTasks), exports.BUFFER_INTERVAL);
++    this.INTERVALS['runBufferedTasks'] = setInterval(this._bind(this.runBufferedTasks), exports.EXECUTE_INTERVAL);
++}
++
+ /**
+  * Run tasks that have been buffered locally.
+  */
+ Fresnel.prototype.runBufferedTasks = function() {
++    console.log("Running buffered tasks... (" + this.BUFFERED_TASKS.length + " in queue)");
++
+     while (this.BUFFERED_TASKS.length > 0) {
+         var task = this.BUFFERED_TASKS.pop();
+         this._executeTask(task);
+@@ -135,10 +154,39 @@ Fresnel.prototype.shutdown = function() {
+ }
+ 
+ /**
++ * Bind a function to this object.
++ */
++Fresnel.prototype._bind = function(fn) {
++    var scope = this;
++
++    return function() {
++        return fn.apply(scope, arguments);
++    }
++}
++
++/**
+  * Execute a task.
+  */
+ Fresnel.prototype._executeTask = function(task) {
++    console.log("Executing task: " + sys.inspect(task));
++
++    this._getClient().srem(this._namespace("tasks"), this._hash(task), function(err, reply) {
++        if (err) {
++            throw err;
++        }
++    });
++
++    this._getClient().srem(this._namespace("pending"), task['id'], function(err, reply) {
++        if (err) {
++            throw err;
++        }
++    });
+ 
++    this._getClient().del(this._namespace("tasks:" + task['id']), function(err, reply) {
++        if (err) {
++            throw err;
++        }
++    }
+ }
+ 
+ /**
+diff --git a/spawn-tasks.js b/spawn-tasks.js
+new file mode 100644
+index 0000000..b9c0767
+--- /dev/null
++++ b/spawn-tasks.js
+@@ -0,0 +1,33 @@
++var redis = require('redis-client'),
++    Fresnel = require('fresnel').Fresnel;
++
++redis.debugMode = false;
++
++var fresnel = new Fresnel();
++
++function randomTask() {
++    return {
++        "class": randomString(),
++        "args": []
++    };
++}
++
++var CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
++
++function randomString(length) {
++    length = length || 16;
++    var text = "";
++
++    for (var i=0; i < length; i++) {
++        text += CHARACTERS.charAt(Math.floor(Math.random() * CHARACTERS.length));
++    }
++
++    return text;
++}
++
++for (var i = 0; i < 10; i++) {
++    fresnel.createTask(randomTask(), function() {
++        fresnel.shutdown();
++    });
++}
++
