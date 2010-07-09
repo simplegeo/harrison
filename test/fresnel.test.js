@@ -147,4 +147,37 @@ module.exports = {
             fresnel.shutdown();
         }, 100);
     },
+    "update definition should store an internal defintion": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var resultTask;
+
+        var taskId = 42;
+        var task = randomTask();
+        assert.ok(task.id == null);
+
+        fresnel._getClient = function() {
+            return {
+                "set": function(key, value) {
+                    resultTask = JSON.parse(value);
+                }
+            };
+        }
+
+        fresnel._updateDefinition(taskId, task);
+
+        beforeExit(function() {
+            assert.equal(taskId, resultTask.id);
+        });
+    },
+    "hash function should only consider public fields": function(assert) {
+        var fresnel = new Fresnel(randomString());
+
+        var task = randomTask();
+        var hash = fresnel._hash(task);
+
+        task.id = "1234";
+
+        assert.equal(hash, fresnel._hash(task));
+    }
 }
