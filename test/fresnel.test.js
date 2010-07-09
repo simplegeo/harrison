@@ -1,4 +1,5 @@
 var assert = require('assert'),
+    sys = require('sys'),
     redis = require('redis-client'),
     EventEmitter = require('events').EventEmitter;
 
@@ -26,6 +27,16 @@ function randomString(length) {
     }
 
     return text;
+}
+
+function replaceClientMethod(fresnel, method, func) {
+    var _getClient = fresnel._getClient;
+
+    fresnel._getClient = function() {
+        var client = _getClient.apply(this);
+        client[method] = func;
+        return client;
+    }
 }
 
 module.exports = {
@@ -147,7 +158,63 @@ module.exports = {
             fresnel.shutdown();
         }, 100);
     },
-    "update definition should store an internal defintion": function(assert, beforeExit) {
+    "should add to the 'tasks' set when creating tasks": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+        
+        var calledWithKey;
+
+        replaceClientMethod(fresnel, 'sadd', function(key, value, callback) {
+            calledWithKey = key;
+            callback();
+        });
+        
+        fresnel.createTask(randomTask(), function() {
+            fresnel.shutdown();
+        });
+
+        beforeExit(function() {
+            assert.equal(fresnel._namespace("tasks"), calledWithKey);
+        });
+    },
+    "should add to the 'queue' sorted set when creating tasks": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+        
+        var calledWithKey;
+
+        replaceClientMethod(fresnel, 'zadd', function(key, score, value, callback) {
+            calledWithKey = key;
+            callback();
+        });
+        
+        fresnel.createTask(randomTask(), function() {
+            fresnel.shutdown();
+        });
+
+        beforeExit(function() {
+            assert.equal(fresnel._namespace("queue"), calledWithKey);
+        });
+    },
+    "should form a task definition when creating tasks": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+        
+        var calledWithKey;
+
+        replaceClientMethod(fresnel, 'set', function(key, value, callback) {
+            calledWithKey = key;
+            callback();
+        });
+
+        var task = randomTask();
+        
+        fresnel.createTask(task, function() {
+            fresnel.shutdown();
+        });
+
+        beforeExit(function() {
+            assert.equal(fresnel._namespace("tasks:" + task.id), calledWithKey);
+        });
+    },
+    "update definition should store an internal definition": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
         var resultTask;
