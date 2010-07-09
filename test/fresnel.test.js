@@ -37,7 +37,10 @@ function replaceClientMethod(fresnel, method, func) {
 
     fresnel._getClient = function() {
         var client = _getClient.apply(this);
-        client[method] = func;
+        client[method] = function() {
+            var callback = arguments[arguments.length - 1];
+            callback(null, func.apply(null, arguments));
+        };
         return client;
     }
 }
@@ -138,7 +141,6 @@ module.exports = {
 
         replaceClientMethod(fresnel, 'sadd', function(key, value, callback) {
             calledWithKey = key;
-            callback();
         });
         
         fresnel.createTask(randomTask());
@@ -154,7 +156,6 @@ module.exports = {
 
         replaceClientMethod(fresnel, 'zadd', function(key, score, value, callback) {
             calledWithKey = key;
-            callback();
         });
         
         fresnel.createTask(randomTask());
@@ -170,7 +171,6 @@ module.exports = {
 
         replaceClientMethod(fresnel, 'set', function(key, value, callback) {
             calledWithKey = key;
-            callback();
         });
 
         var task = randomTask();
@@ -223,10 +223,6 @@ module.exports = {
 
         replaceClientMethod(fresnel, 'srem', function(key, value, callback) {
             removedKey = key;
-
-            if (callback) {
-                callback();
-            }
         });
 
         fresnel.createTask(task, function() {
