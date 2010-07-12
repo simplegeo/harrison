@@ -199,9 +199,8 @@ module.exports = {
 
         var resultTask;
 
-        var taskId = 42;
         var task = randomTask();
-        assert.ok(task.id == null);
+        task.id = 42;
 
         fresnel._getClient = function() {
             return {
@@ -211,10 +210,10 @@ module.exports = {
             };
         }
 
-        fresnel._updateDefinition(taskId, task);
+        fresnel._updateDefinition(task);
 
         beforeExit(function() {
-            assert.equal(taskId, resultTask.id);
+            assert.equal(task.id, resultTask.id);
         });
     },
     "_getDefinitions should load multiple task definitions": function(assert, beforeExit) {
@@ -239,7 +238,7 @@ module.exports = {
             taskIds.push(taskId);
             task.id = taskId;
 
-            fresnel._updateDefinition(taskId, task, function() {
+            fresnel._updateDefinition(task, function() {
                 if (++insertCount == tasks.length) {
                     fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
                         taskDefs = defs;
@@ -259,7 +258,7 @@ module.exports = {
         var taskDefs;
         task.id = Math.floor(Math.random() * 10);
 
-        fresnel._updateDefinition(task.id, task, function() {
+        fresnel._updateDefinition(task, function() {
             fresnel._getDefinitions(task.id, function(defs) {
                 taskDefs = defs;
             });
