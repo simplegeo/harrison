@@ -32,6 +32,16 @@ function randomString(length) {
     return text;
 }
 
+function range(end) {
+    var range = [];
+    for (var i = 0; i < end; i++) {
+        range.push(i);
+    }
+
+    return range;
+}
+
+
 function replaceClientMethod(fresnel, method, func) {
     var _getClient = fresnel._getClient;
 
@@ -205,6 +215,58 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(taskId, resultTask.id);
+        });
+    },
+    "_getDefinitions should load multiple task definitions": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var tasks = [];
+        var taskIds = [];
+        var taskDefs = [];
+
+        var insertCount = 0;
+
+        for (var i = 0; i < 5; i++) {
+            tasks.push(randomTask());
+        }
+
+        tasks.forEach(function(task) {
+            var taskId;
+            do {
+                taskId = Math.floor(Math.random() * 10);
+            } while (taskIds.indexOf(taskId) >= 0);
+
+            taskIds.push(taskId);
+            task.id = taskId;
+
+            fresnel._updateDefinition(taskId, task, function() {
+                if (++insertCount == tasks.length) {
+                    fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
+                        taskDefs = defs;
+                    });
+                }
+            });
+        });
+
+        beforeExit(function() {
+            assert.eql(tasks.slice(0, 2), taskDefs);
+        });
+    },
+    "_getDefinitions should load individual task definitions": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var task = randomTask();
+        var taskDefs;
+        task.id = Math.floor(Math.random() * 10);
+
+        fresnel._updateDefinition(task.id, task, function() {
+            fresnel._getDefinitions(task.id, function(defs) {
+                taskDefs = defs;
+            });
+        });
+
+        beforeExit(function() {
+            assert.eql(task, taskDefs[0]);
         });
     },
     "hash function should only consider public fields": function(assert) {
