@@ -1,4 +1,4 @@
-require('date_helper');
+require('ext/date').extend(Date);
 
 module.exports = {
     'test date formatting': function(assert) {
