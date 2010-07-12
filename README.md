@@ -162,7 +162,7 @@ The concurrency of the following operations is configurable:
 ## Dependencies
 
 Fresnel depends on Node.js >= 1.100, Redis 2.0.0RC1+,
-[redis-node-client](http://github.com/fictorial/redis-node-client),
+[redis-node-client](http://github.com/mojodna/redis-node-client),
 [hashlib](http://github.com/brainfucker/hashlib), and
 [expresso](http://github.com/visionmedia/expresso).
 
@@ -170,6 +170,10 @@ Fresnel depends on Node.js >= 1.100, Redis 2.0.0RC1+,
 
 Follow the instructions for hashlib to add it to Node's `require.path`.
 
+## Running the tests
+
+    $ NODE_PATH=lib expresso
+
 ## Starting
 
-    $ NODE_PATH=../../fictorial/redis-node-client/lib/:lib/ node fresnel.js
+    $ NODE_PATH=../../fictorial/redis-node-client/lib/:lib/ node lib/fresnel.js
