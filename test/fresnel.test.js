@@ -32,16 +32,6 @@ function randomString(length) {
     return text;
 }
 
-function range(end) {
-    var range = [];
-    for (var i = 0; i < end; i++) {
-        range.push(i);
-    }
-
-    return range;
-}
-
-
 function replaceClientMethod(fresnel, method, func) {
     var _getClient = fresnel._getClient;
 
