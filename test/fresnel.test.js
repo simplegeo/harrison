@@ -442,8 +442,11 @@ module.exports = {
         });
 
         beforeExit(function() {
+            added = added.filter(function(x) {
+                return x[0] == fresnel._namespace('reservoir');
+            });
+
             assert.equal(1, added.length);
-            assert.equal(fresnel._namespace('reservoir'), added[0][0]);
             assert.ok(new Date().getTime() < added[0][1]);
             assert.equal(task.id, added[0][2]);
         });
@@ -471,6 +474,35 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(errorString, lastError);
+        });
+    },
+    "when tasks fail, they should be added to the 'failed' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var added = [];
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
+                added.push([key, score, value]);
+            });
+
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            added = added.filter(function(x) {
+                return x[0] == fresnel._namespace('failed');
+            });
+
+            assert.equal(1, added.length);
+            assert.equal(1, added[0][1]);
+            assert.equal(task.id, added[0][2]);
         });
 
     },
