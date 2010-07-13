@@ -368,4 +368,52 @@ module.exports = {
             assert.ok(removedKeys.indexOf(fresnel._namespace("tasks:" + task.id)) >= 0);
         });
     },
+    "when tasks fail, their task definitions should remain": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDefs = [];
+
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._executeTask(task, function() {
+                fresnel._getDefinitions(task.id, function(defs) {
+                    taskDefs = defs;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(1, taskDefs.length);
+        });
+    },
+    "when tasks fail, they should be removed from the 'pending' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var pendingCount;
+
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._executeTask(task, function() {
+                fresnel.getPendingCount(function(count) {
+                    pendingCount = count;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(0, pendingCount);
+        });
+    },
 }
