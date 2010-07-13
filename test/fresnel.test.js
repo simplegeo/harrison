@@ -422,6 +422,32 @@ module.exports = {
             assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
         });
     },
+    "when tasks fail, they should be added to the 'reservoir', scheduled in the future": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var added = [];
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
+                added.push([key, score, value]);
+            });
+
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.equal(1, added.length);
+            assert.equal(fresnel._namespace('reservoir'), added[0][0]);
+            assert.ok(new Date().getTime() < added[0][1]);
+            assert.equal(task.id, added[0][2]);
+        });
+    },
     "when tasks fail, their error message should be set in the 'errors:<id>' string value": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
