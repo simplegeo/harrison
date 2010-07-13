@@ -504,6 +504,37 @@ module.exports = {
             assert.equal(1, added[0][1]);
             assert.equal(task.id, added[0][2]);
         });
+    "when tasks fail subsequently, their attempt count in the 'failed' set should be incremented": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var added = [];
+        var attempts = 5;
+        var task = randomTask();
+        task.attempts = attempts;
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
+                added.push([key, score, value]);
+            });
+
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            added = added.filter(function(x) {
+                return x[0] == fresnel._namespace('failed');
+            });
+
+            assert.equal(1, added.length);
+            assert.equal(attempts + 1, added[0][1]);
+            assert.equal(task.id, added[0][2]);
+        });
+    },
 
     },
 }
