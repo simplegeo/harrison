@@ -396,8 +396,13 @@ module.exports = {
         var fresnel = new Fresnel(randomString());
 
         var pendingCount;
+        var removedKeys = [];
 
         var task = randomTask();
+
+        replaceClientMethod(fresnel, 'srem', function(client, method, key, value, callback) {
+            removedKeys.push(key);
+        });
 
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
@@ -414,6 +419,7 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(0, pendingCount);
+            assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
         });
     },
     "when tasks fail, their error message should be set in the 'errors:<id>' string value": function(assert, beforeExit) {
