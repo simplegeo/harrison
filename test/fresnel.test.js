@@ -32,6 +32,11 @@ function randomString(length) {
     return text;
 }
 
+function pending(test) {
+    // console.log("PENDING");
+    // console.log(test);
+}
+
 function replaceClientMethod(fresnel, method, func) {
     var _getClient = fresnel._getClient;
 
@@ -275,6 +280,27 @@ module.exports = {
         task.id = "1234";
 
         assert.equal(hash, fresnel._hash(task));
+    },
+    "shutdown should close the Redis client connection": function(assert, beforeExit) {
+        pending(function() {
+            var fresnel = new Fresnel(randomString());
+
+            var closed = false;
+
+            replaceClientMethod(fresnel, 'close', function(client, method) {
+                closed = true;
+                method.apply(client);
+            });
+
+            // open a client connection
+            fresnel._getClient();
+            fresnel.shutdown();
+            console.log("shut down");
+
+            beforeExit(function() {
+                assert.ok(closed);
+            });
+        });
     },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
