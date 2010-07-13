@@ -416,4 +416,30 @@ module.exports = {
             assert.equal(0, pendingCount);
         });
     },
+    "when tasks fail, their error message should be set in the 'errors:<id>' string value": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var lastError;
+        var errorString = randomString();
+
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false, errorString);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._executeTask(task, function(task) {
+                fresnel.getLastError(task.id, function(error) {
+                    lastError = error;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(errorString, lastError);
+        });
+
+    },
 }
