@@ -271,6 +271,19 @@ module.exports = {
             assert.eql(task, taskDefs[0]);
         });
     },
+    "_getDefinitions should handle empty task definitions gracefully": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDefs = [];
+
+        fresnel._getDefinitions(Math.floor(Math.random() * 10), function(defs) {
+            taskDefs = defs;
+        });
+
+        beforeExit(function() {
+            assert.eql([], taskDefs);
+        });
+    },
     "hash function should only consider public fields": function(assert) {
         var fresnel = new Fresnel(randomString());
 
