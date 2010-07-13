@@ -8,10 +8,6 @@ var Fresnel = _fresnel.Fresnel;
 
 _fresnel.AUTO_CLOSE = true;
 
-process.addListener('uncaughtException', function(err) {
-    console.log("Caught exception: " + err);
-});
-
 function randomTask() {
     return {
         "class": randomString(),
