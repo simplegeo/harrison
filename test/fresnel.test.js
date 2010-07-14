@@ -563,6 +563,7 @@ module.exports = {
         var erroredTasks = [];
         var attempts = _fresnel.MAX_RETRIES;
         var task = randomTask();
+        // TODO _setFailureAttempts() etc. should handle this
         task.attempts = attempts;
 
         fresnel._runTask = function(task, callback) {
@@ -583,6 +584,69 @@ module.exports = {
         beforeExit(function() {
             assert.equal(1, erroredTasks.length);
             assert.equal(task.id, erroredTasks[0]);
+        });
+    },
+    "when tasks fail for the Nth time, they should be removed from the 'pending' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var pendingCount;
+        var removedKeys = [];
+
+        var attempts = _fresnel.MAX_RETRIES;
+        var task = randomTask();
+        task.attempts = attempts;
+
+        replaceClientMethod(fresnel, 'srem', function(client, method, key, value, callback) {
+            removedKeys.push(key);
+        });
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._executeTask(task, function() {
+                    fresnel.getPendingCount(function(count) {
+                        pendingCount = count;
+                    });
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(0, pendingCount);
+            assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
+        });
+    },
+    "when tasks fail, their error message should be set in the 'errors:<id>' string value": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var lastError;
+        var errorString = randomString();
+
+        var attempts = _fresnel.MAX_RETRIES;
+        var task = randomTask();
+        task.attempts = attempts;
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false, errorString);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._executeTask(task, function(task) {
+                    fresnel.getLastError(task.id, function(error) {
+                        lastError = error;
+                    });
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(errorString, lastError);
         });
     },
 
