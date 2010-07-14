@@ -533,6 +533,7 @@ module.exports = {
         var failedTasks = [];
         var attempts = 5;
         var task = randomTask();
+        task.attempts = attempts;
 
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
@@ -547,8 +548,6 @@ module.exports = {
                     });
                 });
             });
-
-
         });
 
         beforeExit(function() {
@@ -560,7 +559,7 @@ module.exports = {
     "when tasks fail for the Nth time, they should be added to the 'error' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var erroredTasks = [];
+        var erroredTasks;
         var attempts = _fresnel.MAX_RETRIES;
         var task = randomTask();
         // TODO _setFailureAttempts() etc. should handle this
@@ -647,6 +646,33 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(errorString, lastError);
+        });
+    },
+    "when tasks fail for the Nth time, they should be removed from the 'failed' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var failedTasks;
+        var attempts = _fresnel.MAX_RETRIES;
+        var task = randomTask();
+        task.attempts = attempts;
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._executeTask(task, function() {
+                    fresnel.getFailedTasks(function(tasks) {
+                        failedTasks = tasks;
+                    });
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(0, failedTasks.length);
         });
     },
 
