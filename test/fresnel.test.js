@@ -150,6 +150,22 @@ module.exports = {
 
         fresnel.createTask(randomTask());
     },
+    "should yield the task id when creating a task": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskId;
+
+        fresnel._generateId(function() {
+            // task will be assigned the 2nd generated id
+            fresnel.createTask(randomTask(), function(id) {
+                taskId = id;
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(2, taskId);
+        });
+    },
     "shouldn't fail when creating a duplicate task with no callback": function(assert) {
         var fresnel = new Fresnel(randomString());
 
@@ -157,6 +173,22 @@ module.exports = {
 
         fresnel.createTask(task, function() {
             fresnel.createTask(task);
+        });
+    },
+    "should yield 'false' when creating a duplicate task": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomTask());
+
+        var taskId;
+        var task = randomTask();
+
+        fresnel.createTask(task, function() {
+            fresnel.createTask(task, function(id) {
+                taskId = id;
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(false, taskId);
         });
     },
     "should add to the 'tasks' set when creating tasks": function(assert, beforeExit) {
