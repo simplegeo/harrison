@@ -352,6 +352,24 @@ module.exports = {
             });
         });
     },
+    "_setFailureAttempts should update the task definition": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var attempts = 5;
+
+        fresnel.createTask(randomTask(), function(taskId) {
+            fresnel._setFailureAttempts(taskId, attempts, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(attempts, taskDef.attempts);
+        });
+    },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
