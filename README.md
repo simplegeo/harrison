@@ -90,8 +90,7 @@ value, `fresnel` by default):
 * `failed` - sorted set containing ids of failed tasks (sort key = `attempts`)
 * `pending` - sorted set containing ids of reserved (in Fresnel's local buffer)
   tasks (sort key = `reservedAt`)
-* `error` - set containing tasks that passed the retry limit (TODO there may be
-  duplicates if the same task is [intentionally] queued/run multiple times)
+* `error` - set containing tasks that passed the retry limit
 * `invalid` - set containing ids of invalid tasks (invalid JSON, etc.)
 * `errors:<id>` - string value containing the most recent error output for a
   failed task
