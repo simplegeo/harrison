@@ -259,21 +259,21 @@ module.exports = {
             assert.eql(tasks.slice(0, 2), taskDefs);
         });
     },
-    "_getDefinitions should load individual task definitions": function(assert, beforeExit) {
+    "_getDefinition should load individual task definitions": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
         var task = randomTask();
-        var taskDefs;
+        var taskDef;
         task.id = Math.floor(Math.random() * 10);
 
         fresnel._updateDefinition(task, function() {
-            fresnel._getDefinitions(task.id, function(defs) {
-                taskDefs = defs;
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
             });
         });
 
         beforeExit(function() {
-            assert.eql(task, taskDefs[0]);
+            assert.eql(task, taskDef);
         });
     },
     "_getDefinitions should handle empty task definitions gracefully": function(assert, beforeExit) {
