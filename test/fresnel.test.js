@@ -197,8 +197,8 @@ module.exports = {
         var task = randomTask();
         
         fresnel.createTask(task, function() {
-            fresnel._getDefinitions(task.id, function(defs) {
-                taskDef = defs[0];
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
             });
         });
 
@@ -215,8 +215,8 @@ module.exports = {
         task.id = 42;
 
         fresnel._updateDefinition(task, function() {
-            fresnel._getDefinitions(task.id, function(defs) {
-                taskDef = defs[0];
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
             });
         });
 
@@ -380,7 +380,7 @@ module.exports = {
     "when tasks fail, their task definitions should remain": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var taskDefs = [];
+        var taskDef;
 
         var task = randomTask();
 
@@ -391,14 +391,14 @@ module.exports = {
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
-                fresnel._getDefinitions(task.id, function(defs) {
-                    taskDefs = defs;
+                fresnel._getDefinition(task.id, function(def) {
+                    taskDef = def;
                 });
             });
         });
 
         beforeExit(function() {
-            assert.equal(1, taskDefs.length);
+            assert.ok(taskDef);
         });
     },
     "when tasks fail, they should be removed from the 'pending' set": function(assert, beforeExit) {
