@@ -55,7 +55,7 @@ module.exports = {
             assert.equal(true, ran);
         });
     },
-    '.wrap should wrap a function with a wrapper, and bind "this" correctly': function(assert) {
+    '.wrap should wrap a function with a wrapper': function(assert) {
         var f = function(arg) {
             return arg;
         }
@@ -97,6 +97,15 @@ module.exports = {
         }
 
         var b = f.barrier(1, function(super, arg) { return super(arg + 1) });
+
+        assert.equal(2, b(1));
+    },
+    '.barrier should accept a result tuple that will be passed to the original callback': function(assert) {
+        var f = function(arg) {
+            return arg;
+        }
+
+        var b = f.barrier(1, [2]);
 
         assert.equal(2, b(1));
     }
