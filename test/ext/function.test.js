@@ -54,5 +54,50 @@ module.exports = {
         beforeExit(function() {
             assert.equal(true, ran);
         });
+    },
+    '.wrap should wrap a function with a wrapper, and bind "this" correctly': function(assert) {
+        var f = function(arg) {
+            return arg;
+        }
+
+        var f2 = f.wrap(function(super, arg) {
+            return super(arg + 1);
+        });
+
+        assert.equal(2, f2(1));
+    },
+    '.wrap should bind "this" correctly': function(assert) {
+        var f = function() {
+            return this;
+        }
+
+        var f2 = f.wrap(function(super) {
+            return super();
+        });
+
+        assert.equal("this", f2.call("this"));
+    },
+    '.barrier should wait until N calls before calling the callback': function(assert) {
+        var called = false;
+
+        var f = function() {
+            called = true;
+        }
+
+        var b = f.barrier(2);
+
+        b();
+        assert.equal(false, called);
+        b();
+        assert.equal(true, called);
+    },
+    '.barrier should accept a wrapper function that will wrap around the original function': function (assert) {
+        var f = function(arg) {
+            return arg;
+        }
+
+        var b = f.barrier(1, function(super, arg) { return super(arg + 1) });
+
+        assert.equal(2, b(1));
     }
 }
