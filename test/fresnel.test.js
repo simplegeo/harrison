@@ -410,14 +410,14 @@ module.exports = {
 
         beforeExit(function() {
             // queuedAt should be within 500ms
-            assert.almostEqual(queuedAt, taskDef.queuedAt, 500);
+            assert.almostEqual(queuedAt, Date.parse(taskDef.queuedAt), 500);
         });
     },
     "_queueTask should update the task definition with 'scheduledFor'": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
         var taskDef;
-        var scheduledFor = Math.floor(Math.random() * new Date().getTime());
+        var scheduledFor = new Date(Math.floor(Math.random() * new Date().getTime()));
 
         fresnel._createDefinition(randomTask(), function(taskId) {
             fresnel._queueTask(taskId, scheduledFor, function() {
@@ -428,7 +428,7 @@ module.exports = {
         });
 
         beforeExit(function() {
-            assert.equal(scheduledFor, taskDef.scheduledFor);
+            assert.equal(scheduledFor.toISOString(), taskDef.scheduledFor);
         });
     },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
