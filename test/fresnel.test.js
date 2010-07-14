@@ -476,7 +476,7 @@ module.exports = {
             assert.equal(errorString, lastError);
         });
     },
-    "when tasks fail, they should be added to the 'failed' set": function(assert, beforeExit) {
+    "when tasks fail for the first time, they should be added to the 'failed' set with an attempt count of 1": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
         var failedTasks = [];
