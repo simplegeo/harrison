@@ -224,18 +224,22 @@ module.exports = {
     "should form a task definition when creating tasks": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
         
+        var taskId;
         var taskDef;
 
         var task = randomTask();
         
-        fresnel.createTask(task, function() {
+        fresnel.createTask(task, function(id) {
+            taskId = id;
             fresnel._getDefinition(task.id, function(def) {
                 taskDef = def;
             });
         });
 
         beforeExit(function() {
-            assert.eql(task, taskDef);
+            assert.equal(taskId, taskDef.id);
+            assert.equal(task.class, taskDef.class);
+            assert.eql(task.args, taskDef.args);
         });
     },
     "update definition should store an internal definition": function(assert, beforeExit) {
@@ -388,6 +392,43 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(attempts + 1, taskDef.attempts);
+        });
+    },
+    "_queueTask should update the task definition with 'queuedAt'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var queuedAt = new Date().getTime();
+
+        fresnel._createDefinition(randomTask(), function(taskId) {
+            fresnel._queueTask(taskId, null, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            // queuedAt should be within 500ms
+            assert.almostEqual(queuedAt, taskDef.queuedAt, 500);
+        });
+    },
+    "_queueTask should update the task definition with 'scheduledFor'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var scheduledFor = Math.floor(Math.random() * new Date().getTime());
+
+        fresnel._createDefinition(randomTask(), function(taskId) {
+            fresnel._queueTask(taskId, scheduledFor, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(scheduledFor, taskDef.scheduledFor);
         });
     },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
