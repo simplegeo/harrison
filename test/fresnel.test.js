@@ -66,15 +66,28 @@ module.exports = {
         var task = randomTask();
 
         fresnel.createTask(task, function() {
+            fresnel.bufferTasks();
+        });
+
+        beforeExit(function() {
+            assert.equal(task.toString(), fresnel.BUFFERED_TASKS[0].toString());
+        });
+    },
+    "should remove buffered tasks from the 'queue' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var queueLength;
+
+        fresnel.createTask(randomTask(), function() {
             fresnel.bufferTasks(function() {
                 fresnel.getUnbufferedQueueLength(function(length) {
-                    assert.equal(0, length);
+                    queueLength = length;
                 });
             });
         });
 
         beforeExit(function() {
-            assert.equal(task.toString(), fresnel.BUFFERED_TASKS[0].toString());
+            assert.equal(0, queueLength);
         });
     },
     'should mark buffered tasks as pending': function(assert, beforeExit) {
