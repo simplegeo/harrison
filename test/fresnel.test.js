@@ -557,6 +557,34 @@ module.exports = {
             assert.equal(attempts + 1, failedTasks[0][1]);
         });
     },
+    "when tasks fail for the Nth time, they should be added to the 'error' set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var erroredTasks = [];
+        var attempts = _fresnel.MAX_RETRIES;
+        var task = randomTask();
+        task.attempts = attempts;
+
+        fresnel._runTask = function(task, callback) {
+            // simulate a failed test
+            callback(task, false);
+        }
+
+        fresnel.createTask(task, function() {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._executeTask(task, function() {
+                    fresnel.getErroredOutTasks(function(tasks) {
+                        erroredTasks = tasks;
+                    });
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(1, erroredTasks.length);
+            assert.equal(task.id, erroredTasks[0]);
+        });
+    },
 
     },
 }
