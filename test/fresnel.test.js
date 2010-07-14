@@ -479,7 +479,7 @@ module.exports = {
     "when tasks fail, they should be added to the 'failed' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var added = [];
+        var failedTasks = [];
         var task = randomTask();
 
         fresnel._runTask = function(task, callback) {
@@ -488,29 +488,24 @@ module.exports = {
         }
 
         fresnel.createTask(task, function() {
-            replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
-                added.push([key, score, value]);
+            fresnel._executeTask(task, function() {
+                fresnel.getFailedTasks(function(tasks) {
+                    failedTasks = tasks;
+                });
             });
-
-            fresnel._executeTask(task);
         });
 
         beforeExit(function() {
-            added = added.filter(function(x) {
-                return x[0] == fresnel._namespace('failed');
-            });
-
-            assert.equal(1, added.length);
-            assert.equal(1, added[0][1]);
-            assert.equal(task.id, added[0][2]);
+            assert.equal(1, failedTasks.length);
+            assert.equal(task.id, failedTasks[0][0]);
+            assert.equal(1, failedTasks[0][1]);
         });
     "when tasks fail subsequently, their attempt count in the 'failed' set should be incremented": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var added = [];
+        var failedTasks = [];
         var attempts = 5;
         var task = randomTask();
-        task.attempts = attempts;
 
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
@@ -518,21 +513,23 @@ module.exports = {
         }
 
         fresnel.createTask(task, function() {
-            replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
-                added.push([key, score, value]);
+            // TODO create a method for this
+            fresnel._getClient().zadd(fresnel._namespace("failed"), attempts, task.id, function(err, reply) {
+                fresnel._executeTask(task, function() {
+                    fresnel.getFailedTasks(function(tasks) {
+                        console.log("Failed tasks: " + tasks);
+                        failedTasks = tasks;
+                    });
+                });
             });
 
-            fresnel._executeTask(task);
+
         });
 
         beforeExit(function() {
-            added = added.filter(function(x) {
-                return x[0] == fresnel._namespace('failed');
-            });
-
-            assert.equal(1, added.length);
-            assert.equal(attempts + 1, added[0][1]);
-            assert.equal(task.id, added[0][2]);
+            assert.equal(1, failedTasks.length);
+            assert.equal(task.id, failedTasks[0][0]);
+            assert.equal(attempts + 1, failedTasks[0][1]);
         });
     },
 
