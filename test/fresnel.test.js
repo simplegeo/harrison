@@ -192,40 +192,36 @@ module.exports = {
     "should form a task definition when creating tasks": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
         
-        var calledWithKey;
-
-        replaceClientMethod(fresnel, 'set', function(client, method, key, value, callback) {
-            calledWithKey = key;
-        });
+        var taskDef;
 
         var task = randomTask();
         
-        fresnel.createTask(task);
+        fresnel.createTask(task, function() {
+            fresnel._getDefinitions(task.id, function(defs) {
+                taskDef = defs[0];
+            });
+        });
 
         beforeExit(function() {
-            assert.equal(fresnel._namespace("tasks:" + task.id), calledWithKey);
+            assert.eql(task, taskDef);
         });
     },
     "update definition should store an internal definition": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var resultTask;
+        var taskDef;
 
         var task = randomTask();
         task.id = 42;
 
-        fresnel._getClient = function() {
-            return {
-                "set": function(key, value) {
-                    resultTask = JSON.parse(value);
-                }
-            };
-        }
-
-        fresnel._updateDefinition(task);
+        fresnel._updateDefinition(task, function() {
+            fresnel._getDefinitions(task.id, function(defs) {
+                taskDef = defs[0];
+            });
+        });
 
         beforeExit(function() {
-            assert.equal(task.id, resultTask.id);
+            assert.equal(task.id, taskDef.id);
         });
     },
     "_getDefinitions should load multiple task definitions": function(assert, beforeExit) {
