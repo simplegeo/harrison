@@ -328,6 +328,12 @@ module.exports = {
             tasks.push(randomTask());
         }
 
+        var getDefs = function() {
+                fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
+                    taskDefs = defs;
+                });
+        }.barrier(tasks.length);
+
         tasks.forEach(function(task) {
             var taskId;
             do {
@@ -337,13 +343,7 @@ module.exports = {
             taskIds.push(taskId);
             task.id = taskId;
 
-            fresnel._updateDefinition(task, function() {
-                if (++insertCount === tasks.length) {
-                    fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
-                        taskDefs = defs;
-                    });
-                }
-            });
+            fresnel._updateDefinition(task, getDefs);
         });
 
         beforeExit(function() {
