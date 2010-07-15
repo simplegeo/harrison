@@ -119,6 +119,23 @@ module.exports = {
             assert.almostEqual(reservedAt, Date.parse(taskDef.reservedAt), 500);
         });
     },
+    "bufferTasks() should set the task state to 'reserved'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+
+        fresnel.createTask(randomTask(), function(taskId) {
+            fresnel.bufferTasks(function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal("reserved", taskDef.state);
+        });
+    },
     'should buffer tasks with no callback': function(assert) {
         var fresnel = new Fresnel(randomString());
 
