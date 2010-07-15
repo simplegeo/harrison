@@ -112,9 +112,9 @@ module.exports = {
         var reservedAt = new Date().getTime();
         var taskDef;
 
-        fresnel.createTask(randomTask(), function(taskId) {
+        fresnel.createTask(randomTask(), function(task) {
             fresnel.bufferTasks(function() {
-                fresnel._getDefinition(taskId, function(def) {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -129,9 +129,9 @@ module.exports = {
 
         var taskDef;
 
-        fresnel.createTask(randomTask(), function(taskId) {
+        fresnel.createTask(randomTask(), function(task) {
             fresnel.bufferTasks(function() {
-                fresnel._getDefinition(taskId, function(def) {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -195,8 +195,8 @@ module.exports = {
 
         var taskDef;
 
-        fresnel.createTask(randomTask(), function(taskId) {
-            fresnel._getDefinition(taskId, function(def) {
+        fresnel.createTask(randomTask(), function(task) {
+            fresnel._getDefinition(task.id, function(def) {
                 taskDef = def;
             });
         });
@@ -212,8 +212,8 @@ module.exports = {
 
         fresnel._generateId(function() {
             // task will be assigned the 2nd generated id
-            fresnel.createTask(randomTask(), function(id) {
-                taskId = id;
+            fresnel.createTask(randomTask(), function(task) {
+                taskId = task.id;
             });
         });
 
@@ -284,8 +284,8 @@ module.exports = {
 
         var task = randomTask();
         
-        fresnel.createTask(task, function(id) {
-            taskId = id;
+        fresnel.createTask(task, function(task) {
+            taskId = task.id;
             fresnel._getDefinition(task.id, function(def) {
                 taskDef = def;
             });
@@ -455,9 +455,9 @@ module.exports = {
         var taskDef;
         var queuedAt = new Date().getTime();
 
-        fresnel._createDefinition(randomTask(), function(taskId) {
-            fresnel._queueTask(taskId, null, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel._createDefinition(randomTask(), function(task) {
+            fresnel._queueTask(task, null, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -474,9 +474,9 @@ module.exports = {
         var taskDef;
         var queuedAt = new Date();
 
-        fresnel._createDefinition(randomTask(), function(taskId) {
-            fresnel._queueTask(taskId, null, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel._createDefinition(randomTask, function(task) {
+            fresnel._queueTask(task, null, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -494,9 +494,9 @@ module.exports = {
         var task = randomTask();
         task.firstQueuedAt = firstQueuedAt;
 
-        fresnel._createDefinition(task, function(taskId) {
-            fresnel._queueTask(taskId, null, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel._createDefinition(task, function(task) {
+            fresnel._queueTask(task, null, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -512,9 +512,9 @@ module.exports = {
         var taskDef;
         var scheduledFor = new Date(Math.floor(Math.random() * new Date().getTime()));
 
-        fresnel._createDefinition(randomTask(), function(taskId) {
-            fresnel._queueTask(taskId, scheduledFor, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel._createDefinition(randomTask(), function(task) {
+            fresnel._queueTask(task, scheduledFor, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -530,9 +530,9 @@ module.exports = {
         var taskDef;
         var scheduledFor = new Date(Math.floor(Math.random() * new Date().getTime()));
 
-        fresnel._createDefinition(randomTask(), function(taskId) {
-            fresnel._queueTask(taskId, scheduledFor, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel._createDefinition(randomTask(), function(task) {
+            fresnel._queueTask(task, scheduledFor, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -551,9 +551,9 @@ module.exports = {
         var task = randomTask();
         task.firstScheduledFor = firstScheduledFor;
 
-        fresnel._createDefinition(task, function(taskId) {
-            fresnel._queueTask(taskId, scheduledFor, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel._createDefinition(task, function(task) {
+            fresnel._queueTask(task, scheduledFor, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -561,6 +561,32 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(firstScheduledFor, taskDef.firstScheduledFor);
+        });
+    },
+    "_queueTask should put tasks scheduled for the future in the 'reservoir'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskId;
+        var queue;
+        var futureTasks;
+        var scheduledFor = new Date(new Date().getTime() + (10 * 60 * 1000)); // 10 minutes from now
+
+        fresnel._createDefinition(randomTask(), function(task) {
+            taskId = task.id;
+            fresnel._queueTask(task, scheduledFor, function() {
+                fresnel._getQueuedTasks(10, function(tasks) {
+                    queue = tasks;
+                });
+
+                fresnel._getFutureTasks(10, function(tasks) {
+                    futureTasks = tasks;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.eql([], queue);
+            assert.equal(taskId, futureTasks[0][0]);
         });
     },
     "when executing a task, its state should be set to 'running'": function(assert, beforeExit) {
@@ -736,9 +762,9 @@ module.exports = {
 
         fresnel._runTask = failTask;
 
-        fresnel.createTask(task, function(taskId) {
+        fresnel.createTask(task, function(task) {
             fresnel._executeTask(task, function() {
-                fresnel._getDefinition(taskId, function(def) {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -967,10 +993,10 @@ module.exports = {
 
         fresnel._runTask = failTask;
 
-        fresnel.createTask(task, function(taskId) {
+        fresnel.createTask(task, function(task) {
             fresnel._setFailureAttempts(task.id, attempts, function() {
                 fresnel._executeTask(task, function() {
-                    fresnel._getDefinition(taskId, function(def) {
+                    fresnel._getDefinition(task.id, function(def) {
                         taskDef = def;
                     });
                 });
