@@ -101,6 +101,24 @@ module.exports = {
             });
         });
     },
+    "bufferTasks() should update the task definition with 'reservedAt'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var reservedAt = new Date().getTime();
+        var taskDef;
+
+        fresnel.createTask(randomTask(), function(taskId) {
+            fresnel.bufferTasks(function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.almostEqual(reservedAt, Date.parse(taskDef.reservedAt), 500);
+        });
+    },
     'should buffer tasks with no callback': function(assert) {
         var fresnel = new Fresnel(randomString());
 
