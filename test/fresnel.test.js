@@ -563,6 +563,27 @@ module.exports = {
             assert.equal(firstScheduledFor, taskDef.firstScheduledFor);
         });
     },
+    "when executing a task, its state should be set to 'running'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
+            });
+            callback(task, true);
+        };
+
+        fresnel.createTask(task, function(taskId) {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.equal("running", taskDef.state);
+        });
+    },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
