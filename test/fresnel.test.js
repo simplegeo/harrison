@@ -472,7 +472,7 @@ module.exports = {
         var fresnel = new Fresnel(randomString());
 
         var taskDef;
-        var queuedAt = new Date().getTime();
+        var queuedAt = new Date();
 
         fresnel._createDefinition(randomTask(), function(taskId) {
             fresnel._queueTask(taskId, null, function() {
@@ -490,7 +490,7 @@ module.exports = {
         var fresnel = new Fresnel(randomString());
 
         var taskDef;
-        var firstQueuedAt = new Date().toISOString();
+        var firstQueuedAt = new Date(Math.floor(Math.random() * new Date().getTime())).toISOString();
         var task = randomTask();
         task.firstQueuedAt = firstQueuedAt;
 
@@ -582,6 +582,73 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal("running", taskDef.state);
+        });
+    },
+    "when executing a task for the first time, 'firstRunAt' should be set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var firstRunAt = new Date();
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
+            });
+            callback(task, true);
+        };
+
+        fresnel.createTask(task, function(taskId) {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.almostEqual(firstRunAt, Date.parse(taskDef.firstRunAt), 500);
+        });
+    },
+    "when executing a task that was previously run, 'firstRunAt' should be left alone": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var firstRunAt = new Date(Math.floor(Math.random() * new Date().getTime())).toISOString();
+        var task = randomTask();
+        task.firstRunAt = firstRunAt;
+
+        fresnel._runTask = function(task, callback) {
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
+            });
+            callback(task, true);
+        };
+
+        fresnel.createTask(task, function(taskId) {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.equal(firstRunAt, taskDef.firstRunAt);
+        });
+    },
+    "when executing a task, 'lastRunAt' should be set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var lastRunAt = new Date();
+        var task = randomTask();
+
+        fresnel._runTask = function(task, callback) {
+            fresnel._getDefinition(task.id, function(def) {
+                taskDef = def;
+            });
+            callback(task, true);
+        };
+
+        fresnel.createTask(task, function(taskId) {
+            fresnel._executeTask(task);
+        });
+
+        beforeExit(function() {
+            assert.almostEqual(lastRunAt, Date.parse(taskDef.lastRunAt), 500);
         });
     },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
