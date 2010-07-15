@@ -22,3 +22,8 @@ end
 task :tags do
     sh "ctags #{srcs}"
 end
+
+task :jslint do
+    args = (srcs + tests).map { |f| "-process #{f}" }
+    sh "jsl #{args}"
+end
