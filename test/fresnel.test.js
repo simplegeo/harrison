@@ -431,6 +431,45 @@ module.exports = {
             assert.equal(scheduledFor.toISOString(), taskDef.scheduledFor);
         });
     },
+    "_queueTask should update the task definition with 'firstScheduledFor' if it wasn't already set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var scheduledFor = new Date(Math.floor(Math.random() * new Date().getTime()));
+
+        fresnel._createDefinition(randomTask(), function(taskId) {
+            fresnel._queueTask(taskId, scheduledFor, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(scheduledFor.toISOString(), taskDef.firstScheduledFor);
+        });
+    },
+    "_queueTask should leave 'firstScheduledFor' alone if it was already set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var scheduledFor = new Date(Math.floor(Math.random() * new Date().getTime()));
+        var firstScheduledFor = new Date().toISOString();
+        var task = randomTask();
+        task.firstScheduledFor = firstScheduledFor;
+
+        fresnel._createDefinition(task, function(taskId) {
+            fresnel._queueTask(taskId, scheduledFor, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(firstScheduledFor, taskDef.firstScheduledFor);
+        });
+    },
     "when tasks execute successfully, they should be removed from the 'tasks' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
