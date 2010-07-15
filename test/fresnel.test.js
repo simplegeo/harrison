@@ -549,20 +549,19 @@ module.exports = {
     "when tasks execute successfully, their task definition should be removed": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var removedKeys = [];
-
+        var taskDef;
         var task = randomTask();
 
-        replaceClientMethod(fresnel, 'del', function(client, method, key, callback) {
-            removedKeys.push(key);
-        });
-
-        fresnel.createTask(task, function() {
-            fresnel._executeTask(task);
+        fresnel.createTask(task, function(taskId) {
+            fresnel._executeTask(task, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
         });
 
         beforeExit(function() {
-            assert.ok(removedKeys.indexOf(fresnel._namespace("tasks:" + task.id)) >= 0);
+            assert.isNull(taskDef);
         });
     },
     "when tasks fail, their task definitions should remain": function(assert, beforeExit) {
