@@ -338,7 +338,7 @@ module.exports = {
             task.id = taskId;
 
             fresnel._updateDefinition(task, function() {
-                if (++insertCount == tasks.length) {
+                if (++insertCount === tasks.length) {
                     fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
                         taskDefs = defs;
                     });
@@ -793,7 +793,7 @@ module.exports = {
 
         beforeExit(function() {
             added = added.filter(function(x) {
-                return x[0] == fresnel._namespace('reservoir');
+                return x[0] === fresnel._namespace('reservoir');
             });
 
             assert.equal(1, added.length);
@@ -868,7 +868,7 @@ module.exports = {
 
         beforeExit(function() {
             removed = removed.filter(function(x) {
-                return x == fresnel._namespace("errors:" + task.id);
+                return x === fresnel._namespace("errors:" + task.id);
             });
 
             assert.equal(1, removed.length);
