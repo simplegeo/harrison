@@ -51,7 +51,7 @@ function replaceClientMethod(fresnel, method, func) {
             callback(null, func.apply(null, args));
         };
         return client;
-    }
+    };
 }
 
 module.exports = {
@@ -288,7 +288,7 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(taskId, taskDef.id);
-            assert.equal(task.class, taskDef.class);
+            assert.equal(task['class'], taskDef['class']);
             assert.eql(task.args, taskDef.args);
         });
     },
@@ -624,7 +624,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
@@ -653,7 +653,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
@@ -677,7 +677,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
@@ -708,7 +708,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false, errorString);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function(task) {
@@ -731,7 +731,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
@@ -784,7 +784,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -814,7 +814,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -848,7 +848,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -878,7 +878,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false, errorString);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -905,7 +905,7 @@ module.exports = {
         fresnel._runTask = function(task, callback) {
             // simulate a failed test
             callback(task, false);
-        }
+        };
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -920,7 +920,5 @@ module.exports = {
         beforeExit(function() {
             assert.equal(0, failedTasks.length);
         });
-    },
-
-    },
-}
+    }
+};

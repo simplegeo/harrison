@@ -11,4 +11,4 @@ module.exports = {
     'test non-UTC date parsing': function(assert) {
         assert.equal(1278612143347, Date.parse('2010-07-08T12:02:23.347-600'));
     }
-}
+};
