@@ -78,7 +78,7 @@ value, `fresnel` by default):
 
 * `next.task.id` - string value containing the maximum task id, suitable for
   `INCR`ing.
-* `tasks:<id>` - string value containing internal task definition
+* `tasks:<id>` - hash containing the internal definition of a task
 * `tasks` - set containing ids of all pending / running tasks (for uniqueness
   checks)
 * `queue` - sorted set containing ids of pending / running tasks (sort key =
