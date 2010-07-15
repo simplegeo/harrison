@@ -413,6 +413,44 @@ module.exports = {
             assert.almostEqual(queuedAt, Date.parse(taskDef.queuedAt), 500);
         });
     },
+    "_queueTask should update the task definition with 'firstQueuedAt' if it wasn't already set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var queuedAt = new Date().getTime();
+
+        fresnel._createDefinition(randomTask(), function(taskId) {
+            fresnel._queueTask(taskId, null, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.almostEqual(queuedAt, Date.parse(taskDef.firstQueuedAt), 500);
+        });
+    },
+    "_queueTask should leave 'firstQueuedAt' alone if it was already set": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var firstQueuedAt = new Date().toISOString();
+        var task = randomTask();
+        task.firstQueuedAt = firstQueuedAt;
+
+        fresnel._createDefinition(task, function(taskId) {
+            fresnel._queueTask(taskId, null, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal(firstQueuedAt, taskDef.firstQueuedAt);
+        });
+    },
     "_queueTask should update the task definition with 'scheduledFor'": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
