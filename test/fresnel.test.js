@@ -940,7 +940,7 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
                 fresnel._executeTask(task, function() {
-                    fresnel.getErroredOutTasks(function(tasks) {
+                    fresnel.getErroredOutTasks(10, function(tasks) {
                         erroredTasks = tasks;
                     });
                 });
