@@ -54,6 +54,11 @@ function replaceClientMethod(fresnel, method, func) {
     };
 }
 
+var failTask = function(task, callback) {
+    // simulate a failed test
+    callback(task, false);
+};
+
 module.exports = {
     'should be an EventEmitter': function(assert) {
         var fresnel = new Fresnel();
@@ -621,10 +626,7 @@ module.exports = {
 
         var task = randomTask();
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
@@ -636,6 +638,26 @@ module.exports = {
 
         beforeExit(function() {
             assert.ok(taskDef);
+        });
+    },
+    "when tasks fail, their state should be set to 'error'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var task = randomTask();
+
+        fresnel._runTask = failTask;
+
+        fresnel.createTask(task, function(taskId) {
+            fresnel._executeTask(task, function() {
+                fresnel._getDefinition(taskId, function(def) {
+                    taskDef = def;
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal("error", taskDef.state);
         });
     },
     "when tasks fail, they should be removed from the 'pending' set": function(assert, beforeExit) {
@@ -650,10 +672,7 @@ module.exports = {
             removedKeys.push(key);
         });
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
@@ -674,10 +693,7 @@ module.exports = {
         var added = [];
         var task = randomTask();
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             replaceClientMethod(fresnel, 'zadd', function(client, method, key, score, value, callback) {
@@ -728,10 +744,7 @@ module.exports = {
         var failedTasks = [];
         var task = randomTask();
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
@@ -781,10 +794,7 @@ module.exports = {
         var task = randomTask();
         task.attempts = attempts;
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -811,10 +821,7 @@ module.exports = {
         // TODO _setFailureAttempts() etc. should handle this
         task.attempts = attempts;
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -845,10 +852,7 @@ module.exports = {
             removedKeys.push(key);
         });
 
-        fresnel._runTask = function(task, callback) {
-            // simulate a failed test
-            callback(task, false);
-        };
+        fresnel._runTask = failTask;
 
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
@@ -863,6 +867,30 @@ module.exports = {
         beforeExit(function() {
             assert.equal(0, pendingCount);
             assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
+        });
+    },
+    "when tasks fail for the Nth time, their state should be set to 'failed'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+        var attempts = _fresnel.MAX_RETRIES;
+        var task = randomTask();
+        task.attempts = attempts;
+
+        fresnel._runTask = failTask;
+
+        fresnel.createTask(task, function(taskId) {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._executeTask(task, function() {
+                    fresnel._getDefinition(taskId, function(def) {
+                        taskDef = def;
+                    });
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal("failed", taskDef.state);
         });
     },
     "when tasks fail, their error message should be set in the 'errors:<id>' string value": function(assert, beforeExit) {

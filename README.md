@@ -61,6 +61,7 @@ The following states are valid:
 * ready
 * reserved
 * running
+* error
 * failed
    * TODO break into multiple reasons
    * timed-out
