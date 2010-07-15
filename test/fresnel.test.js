@@ -185,6 +185,21 @@ module.exports = {
 
         fresnel.createTask(randomTask());
     },
+    "createTask() should set the task state to 'ready'": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var taskDef;
+
+        fresnel.createTask(randomTask(), function(taskId) {
+            fresnel._getDefinition(taskId, function(def) {
+                taskDef = def;
+            });
+        });
+
+        beforeExit(function() {
+            assert.equal("ready", taskDef.state);
+        });
+    },
     "should yield the task id when creating a task": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
