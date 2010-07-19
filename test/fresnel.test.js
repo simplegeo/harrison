@@ -185,6 +185,35 @@ module.exports = {
             assert.equal(0, fresnel.BUFFERED_TASKS.length);
         });
     },
+    "migrateTasks() should move tasks from the reservoir into the main queue": function(assert, beforeExit) {
+        var fresnel = new Fresnel(randomString());
+
+        var futureTasks;
+        var queuedTasks;
+        var taskId;
+
+        fresnel._createDefinition(randomTask(), function(task) {
+            taskId = task.id;
+
+            fresnel._addToReservoir(task, new Date().getTime(), function() {
+                fresnel.migrateTasks(function() {
+                    fresnel._getQueuedTasks(10, function(tasks) {
+                        queuedTasks = tasks;
+                    });
+
+                    fresnel._getFutureTasks(10, function(tasks) {
+                        futureTasks = tasks;
+                    });
+                });
+            });
+        });
+
+        beforeExit(function() {
+            assert.eql([], futureTasks);
+            assert.equal(1, queuedTasks.length);
+            assert.equal(taskId, queuedTasks[0][0]);
+        });
+    },
     'should create tasks with no callback': function(assert) {
         var fresnel = new Fresnel(randomString());
 
