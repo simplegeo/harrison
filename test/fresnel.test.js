@@ -55,8 +55,13 @@ function replaceClientMethod(fresnel, method, func) {
 }
 
 var failTask = function(task, callback) {
-    // simulate a failed test
-    callback(task, false);
+    // simulate a failed task
+    callback(task, false, "Failed intentionally.");
+};
+
+var successTask = function(task, callback) {
+    // simulate a successful task execution
+    callback(task, true, "Succeeded.");
 };
 
 module.exports = {
@@ -64,22 +69,9 @@ module.exports = {
         var fresnel = new Fresnel();
         assert.ok(fresnel instanceof EventEmitter);
     },
-    'should buffer tasks into a local queue': function(assert, beforeExit) {
-        var fresnel = new Fresnel(randomString());
-
-        // create some tasks in Redis
-        var task = randomTask();
-
-        fresnel.createTask(task, function() {
-            fresnel.bufferTasks();
-        });
-
-        beforeExit(function() {
-            assert.equal(task.toString(), fresnel.BUFFERED_TASKS[0].toString());
-        });
-    },
     "should remove buffered tasks from the 'queue' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
+        fresnel._runTask = successTask;
 
         var queueLength;
 
@@ -97,6 +89,7 @@ module.exports = {
     },
     'should mark buffered tasks as pending': function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
+        fresnel._runTask = successTask;
 
         fresnel.createTask(randomTask(), function() {
             fresnel.bufferTasks(function() {
@@ -108,6 +101,7 @@ module.exports = {
     },
     "bufferTasks() should update the task definition with 'reservedAt'": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
+        fresnel._runTask = successTask;
 
         var reservedAt = new Date().getTime();
         var taskDef;
@@ -129,6 +123,13 @@ module.exports = {
 
         var taskDef;
 
+        // mock out the chain to prevent it from running immediately
+        fresnel._getLocalQueue = function(taskType) {
+            return {
+                add: function() {}
+            };
+        };
+
         fresnel.createTask(randomTask(), function(task) {
             fresnel.bufferTasks(function() {
                 fresnel._getDefinition(task.id, function(def) {
@@ -143,6 +144,8 @@ module.exports = {
     },
     'should buffer tasks with no callback': function(assert) {
         var fresnel = new Fresnel(randomString());
+
+        fresnel._runTask = successTask;
 
         fresnel.createTask(randomTask(), function() {
             fresnel.bufferTasks();
@@ -171,20 +174,6 @@ module.exports = {
             });
         });
     },
-    'Locally buffered tasks should be run': function(assert, beforeExit) {
-        var fresnel = new Fresnel(randomString());
-
-        var task = randomTask();
-        task.id = "1234";
-
-        fresnel.BUFFERED_TASKS = [task];
-
-        fresnel.runBufferedTasks();
-
-        beforeExit(function() {
-            assert.equal(0, fresnel.BUFFERED_TASKS.length);
-        });
-    },
     "migrateTasks() should move tasks from the reservoir into the main queue": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
@@ -195,7 +184,7 @@ module.exports = {
         fresnel._createDefinition(randomTask(), function(task) {
             taskId = task.id;
 
-            fresnel._addToReservoir(task, new Date().getTime(), function() {
+            fresnel._addToReservoir(taskId, new Date().getTime(), function() {
                 fresnel.migrateTasks(function() {
                     fresnel._getQueuedTasks(10, function(tasks) {
                         queuedTasks = tasks;
@@ -260,7 +249,7 @@ module.exports = {
         });
     },
     "should yield 'false' when creating a duplicate task": function(assert, beforeExit) {
-        var fresnel = new Fresnel(randomTask());
+        var fresnel = new Fresnel(randomString());
 
         var taskId;
         var task = randomTask();
@@ -717,6 +706,8 @@ module.exports = {
             removedKeys.push(key);
         });
 
+        fresnel._runTask = successTask;
+
         fresnel.createTask(task, function() {
             fresnel._executeTask(task);
         });
@@ -728,24 +719,27 @@ module.exports = {
     "when tasks execute successfully, they should be removed from the 'pending' set": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var removedKeys = [];
+        var pendingCount;
 
         var task = randomTask();
 
-        replaceClientMethod(fresnel, 'srem', function(client, method, key, value, callback) {
-            removedKeys.push(key);
-        });
+        fresnel._runTask = successTask;
 
         fresnel.createTask(task, function() {
-            fresnel._executeTask(task);
+            fresnel._executeTask(task, function() {
+                fresnel.getPendingCount(function(count) {
+                    pendingCount = count;
+                });
+            });
         });
 
         beforeExit(function() {
-            assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
+            assert.equal(0, pendingCount);
         });
     },
     "when tasks execute successfully, their task definition should be removed": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
+        fresnel._runTask = successTask;
 
         var taskDef;
         var task = randomTask();
@@ -807,13 +801,8 @@ module.exports = {
         var fresnel = new Fresnel(randomString());
 
         var pendingCount;
-        var removedKeys = [];
 
         var task = randomTask();
-
-        replaceClientMethod(fresnel, 'srem', function(client, method, key, value, callback) {
-            removedKeys.push(key);
-        });
 
         fresnel._runTask = failTask;
 
@@ -827,7 +816,6 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(0, pendingCount);
-            assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
         });
     },
     "when tasks fail, they should be added to the 'reservoir', scheduled in the future": function(assert, beforeExit) {
@@ -905,28 +893,26 @@ module.exports = {
     "when tasks fail and subsequently succeed, their error message in 'errors:<id>' should be cleared": function(assert, beforeExit) {
         var fresnel = new Fresnel(randomString());
 
-        var removed = [];
+        var error;
         var attempts = 5;
         var task = randomTask();
 
-        replaceClientMethod(fresnel, 'del', function(client, method, key, callback) {
-            removed.push(key);
-        });
+        fresnel._runTask = successTask;
 
         fresnel.createTask(task, function() {
             fresnel._updateError(task.id, randomString(), function() {
                 fresnel._setFailureAttempts(task.id, attempts, function() {
-                    fresnel._executeTask(task);
+                    fresnel._executeTask(task, function() {
+                        fresnel.getLastError(task.id, function(err) {
+                            error = err;
+                        });
+                    });
                 });
             });
         });
 
         beforeExit(function() {
-            removed = removed.filter(function(x) {
-                return x === fresnel._namespace("errors:" + task.id);
-            });
-
-            assert.equal(1, removed.length);
+            assert.isNull(error);
         });
     },
     "when tasks fail subsequently, their attempt count in the 'failed' set should be incremented": function(assert, beforeExit) {
@@ -985,15 +971,10 @@ module.exports = {
         var fresnel = new Fresnel(randomString());
 
         var pendingCount;
-        var removedKeys = [];
 
         var attempts = _fresnel.MAX_RETRIES;
         var task = randomTask();
         task.attempts = attempts;
-
-        replaceClientMethod(fresnel, 'srem', function(client, method, key, value, callback) {
-            removedKeys.push(key);
-        });
 
         fresnel._runTask = failTask;
 
@@ -1009,7 +990,6 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(0, pendingCount);
-            assert.ok(removedKeys.indexOf(fresnel._namespace("pending")) >= 0);
         });
     },
     "when tasks fail for the Nth time, their state should be set to 'failed'": function(assert, beforeExit) {
