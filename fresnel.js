@@ -31,3 +31,4 @@ fresnel.getReservoirSize(function(length) {
 });
 
 fresnel.processTasks();
+fresnel.acceptTasks();
