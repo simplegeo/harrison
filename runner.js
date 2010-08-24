@@ -1,4 +1,3 @@
-var sys = require('sys');
 var Fresnel = require('fresnel').Fresnel;
 
 var fresnel = new Fresnel();
@@ -7,6 +6,7 @@ fresnel.WORKER_MAP = {
     "Class": "http://localhost:8080/jobs/sample",
     "Backfill": "http://localhost:8080/jobs/backfill",
     "Load": "http://localhost:8081/",
+    "Walk": "http://simplegeo.local:8989/_tasks/walk.json",
     "*": "http://localhost:8081/"
 };
 
@@ -31,4 +31,4 @@ fresnel.getReservoirSize(function(length) {
 });
 
 fresnel.processTasks();
-fresnel.acceptTasks();
+console.log("Task runner started.");
