@@ -15,7 +15,7 @@ fresnel.addListener('task-completed', function(task, response, time) {
 });
 
 fresnel.addListener('task-error', function(task, error, time) {
-    console.log("task " + task.id + " errored: " + error);
+    console.log("task " + task.id + " errored " + task.attempts + " time(s): " + error);
 });
 
 fresnel.addListener('task-failed', function(task, error, time) {
