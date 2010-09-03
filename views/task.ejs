@@ -1,0 +1,42 @@
+<h1>Task Detail</h1>
+
+<table>
+<tr>
+    <td class="key">Type</td><td class="val"><%= task['class'] %></td>
+</tr>
+<tr>
+    <td class="key">Args</td><td class="val"><tt><%= JSON.stringify(task.args) %></tt></td>
+</tr>
+<tr>
+    <td class="key">State</td><td class="val"><%= task.state %></td>
+</tr>
+<tr>
+    <td class="key">Attempts</td><td class="val"><%= task.attempts %></td>
+</tr>
+<tr>
+    <td class="key">Queued</td><td class="val"><%= task.queuedAt %></td>
+</tr>
+<tr>
+    <td class="key">Scheduled For</td><td class="val"><%= task.scheduledFor %></td>
+</tr>
+<tr>
+    <td class="key">Reserved At</td><td class="val"><%= task.reservedAt %></td>
+</tr>
+<tr>
+    <td class="key">Last Run</td><td class="val"><%= task.lastRunAt || "n/a" %></td>
+</tr>
+<tr>
+    <td class="key">First Queued</td><td class="val"><%= task.firstQueuedAt %></td>
+</tr>
+<tr>
+    <td class="key">First Scheduled</td><td class="val"><%= task.firstScheduledFor %></td>
+</tr>
+<tr>
+    <td class="key">First Run</td><td class="val"><%= task.firstRunAt || "n/a" %></td>
+</tr>
+</table>
+
+<% if (lastError) { %>
+<h2>Last Error</h2>
+<pre><%= lastError %></pre>
+<% } %>

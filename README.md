@@ -161,11 +161,16 @@ The concurrency of the following operations is configurable:
 
 ## Dependencies
 
-Fresnel depends on Node.js >= 1.100, Redis 2.0.0RC1+,
-[redis-node-client](http://github.com/mojodna/redis-node-client),
-[hashlib](http://github.com/brainfucker/hashlib),
-[expresso](http://github.com/visionmedia/expresso), and
-[chain-gang](http://github.com/technoweenie/node-chain-gang).
+Fresnel has the following dependencies:
+
+* Node.js >= 1.100
+* Redis 2.0.0RC1+
+* [chain-gang](http://github.com/technoweenie/node-chain-gang)
+* [ejs](http://github.com/visionmedia/ejs)
+* [express](http://github.com/visionmedia/express)
+* [expresso](http://github.com/visionmedia/expresso)
+* [hashlib](http://github.com/brainfucker/hashlib)
+* [redis-node-client](http://github.com/mojodna/redis-node-client)
 
 ## Installing
 

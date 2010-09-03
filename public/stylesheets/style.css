@@ -1,0 +1,46 @@
+body {
+  font: 14px/134% Baskerville, serif;
+  padding: 50px;
+}
+
+a {
+    color: #666;
+    text-decoration: none;
+}
+
+table {
+    border-collapse: collapse;
+    font: 12px "Gill Sans" sans-serif;
+}
+
+table.taskList tr:hover > td {
+    background-color: #eee;
+}
+
+th {
+    border-bottom: 1px solid #333;
+    text-align: left;
+}
+
+td {
+    padding-right: 17px;
+    padding-top: 3px;
+    padding-left: 3px;
+}
+
+td.key {
+    font-weight: normal;
+    text-align: right;
+}
+
+td.val {
+    font-weight: 100;
+}
+
+pre, tt {
+    font-family: Inconsolata, Menlo, monospace;
+}
+
+p.annotation {
+    font: 12px "Gills Sans", sans-serif;
+}

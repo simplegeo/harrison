@@ -1,0 +1,109 @@
+<h1>Fresnel</h1>
+<p>Pending: <%= pendingCount %></p>
+<p>Queued: <%= queuedCount %></p>
+<p>Future: <%= futureCount %></p>
+<p>Failed: <%= failedCount %></p>
+
+<% if (pendingTasks.length > 0) { %>
+<h2>Pending</h2>
+<p class="annotation">Showing 0-<%= pendingTasks.length %> of <%= pendingCount %></p>
+<table id="pending" class="taskList">
+<tr>
+    <th>Type</th>
+    <th>Args</th>
+    <th>State</th>
+    <th>#</th>
+    <th>Reserved At</th>
+    <th>Last Started</th>
+</tr>
+<% pendingTasks.forEach(function(task) { %>
+<tr>
+    <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.reservedAt %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.lastRunAt || "n/a" %></a></td>
+</tr>
+<% }) %>
+</table>
+<% } %>
+
+<% if (queuedTasks.length > 0) { %>
+<h2>Queued</h2>
+<p class="annotation">Showing 0-<%= queuedTasks.length %> of <%= queuedCount %></p>
+<table id="pending" class="taskList">
+<tr>
+    <th>Type</th>
+    <th>Args</th>
+    <th>State</th>
+    <th>#</th>
+    <th>Queued At</th>
+    <th>First Queued</th>
+</tr>
+<% queuedTasks.forEach(function(task) { %>
+<tr>
+    <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.queuedAt %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.firstQueuedAt %></a></td>
+</tr>
+<% }) %>
+</table>
+<% } %>
+
+<% if (futureTasks.length > 0) { %>
+<h2>Future Tasks</h2>
+<p class="annotation">Showing 0-<%= futureTasks.length %> of <%= futureCount %></p>
+<table id="pending" class="taskList">
+<tr>
+    <th>Type</th>
+    <th>Args</th>
+    <th>State</th>
+    <th>#</th>
+    <th>Scheduled For</th>
+    <th>Last Started</th>
+    <th>First Scheduled</th>
+</tr>
+<% futureTasks.forEach(function(task) { %>
+<tr>
+    <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.scheduledFor %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.lastRunAt || "n/a" %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.firstScheduledFor %></a></td>
+</tr>
+<% }) %>
+</table>
+<% } %>
+
+<% if (failedTasks.length > 0) { %>
+<h2>Failed</h2>
+<p class="annotation">Showing 0-<%= failedTasks.length %> of <%= failedCount %></p>
+<table id="pending" class="taskList">
+<tr>
+    <th>Type</th>
+    <th>Args</th>
+    <th>State</th>
+    <th>#</th>
+    <th>Failed At</th>
+    <th>Queued At</th>
+    <th>First Queued</th>
+</tr>
+<% failedTasks.forEach(function(task) { %>
+<tr>
+    <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.failedAt %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.queuedAt %></a></td>
+    <td><a href="/tasks/<%= task.id %>"><%= task.firstQueuedAt %></a></td>
+</tr>
+<% }) %>
+</table>
+<% } %>
