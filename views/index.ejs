@@ -19,7 +19,7 @@
 <% pendingTasks.forEach(function(task) { %>
 <tr>
     <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
-    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= JSON.stringify(task.args) %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.reservedAt %></a></td>
@@ -44,7 +44,7 @@
 <% queuedTasks.forEach(function(task) { %>
 <tr>
     <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
-    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= JSON.stringify(task.args) %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.queuedAt %></a></td>
@@ -70,7 +70,7 @@
 <% futureTasks.forEach(function(task) { %>
 <tr>
     <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
-    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= JSON.stringify(task.args) %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.scheduledFor %></a></td>
@@ -97,7 +97,7 @@
 <% failedTasks.forEach(function(task) { %>
 <tr>
     <td><a href="/tasks/<%= task.id %>"><%= task['class'] %></a></td>
-    <td><a href="/tasks/<%= task.id %>" title="<%= task.args %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
+    <td><a href="/tasks/<%= task.id %>" title="<%= JSON.stringify(task.args) %>"><tt><%=: JSON.stringify(task.args) | truncate:32 %></tt>...</a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.state %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.attempts %></a></td>
     <td><a href="/tasks/<%= task.id %>"><%= task.failedAt %></a></td>
