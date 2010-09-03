@@ -41,6 +41,26 @@ pre, tt {
     font-family: Inconsolata, Menlo, monospace;
 }
 
+ul#nav {
+    background-color: #eee;
+    border: 1px solid #333;
+    border-top: 0px;
+    border-left: 0px;
+    border-bottom-right-radius: 5px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+ul#nav li {
+    display: block;
+    float: left;
+    padding: 5px;
+}
+
 p.paging {
     font: 12px "Gills Sans", sans-serif;
 }
