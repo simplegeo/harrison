@@ -32,20 +32,62 @@ app.configure('production', function() {
 app.get('/', function(req, res) {
     var pendingCount, queuedCount, futureCount, failedCount;
     var pendingTasks, queuedTasks, futureTasks, failedTasks;
+    var pendingOffset, queuedOffset, futureOffset, failedOffset;
     var render = function () {
         res.render('index.ejs', {
             locals: {
+                paginator: function(name, offset, count, total) {
+                    var out = "";
+
+                    if (offset - 10 >= 0) {
+                        out += "<a href=\"?" + name + "_offset=" + (offset - 10) + "\">&lt; prev</a>";
+                    } else {
+                        out += "&lt; prev";
+                    }
+
+                    out += " [ " + (offset + 1) + "-" + (offset + count) + " of " + total + " ] ";
+
+                    if (offset + 10 < total) {
+                        out += "<a href=\"?" + name + "_offset=" + (offset + 10) + "\">next &gt;</a>";
+                    } else {
+                        out += "next &gt;";
+                    }
+
+                    return out;
+                },
+
                 pendingCount: pendingCount,
                 queuedCount: queuedCount,
                 futureCount: futureCount,
                 failedCount: failedCount,
+
                 pendingTasks: pendingTasks,
                 queuedTasks: queuedTasks,
                 futureTasks: futureTasks,
-                failedTasks: failedTasks
+                failedTasks: failedTasks,
+
+                pendingOffset: pendingOffset,
+                queuedOffset: queuedOffset,
+                futureOffset: futureOffset,
+                failedOffset: failedOffset
             }
         });
     }.barrier(8);
+
+    /*
+    Potential way to wrap this up and avoid tracking the barrier count.
+
+    var deferred = new DeferredList();
+
+    deferred.add(fresnel.getPendingCount(function(count) {
+        pendingCount = count;
+        deferred.done();
+    });
+
+    ...
+
+    deferred.addCallback(render);
+    */
 
     fresnel.getPendingCount(function(count) {
         pendingCount = count;
@@ -67,7 +109,9 @@ app.get('/', function(req, res) {
         render();
     });
 
-    fresnel._getPendingTasks(10, function(tasks) {
+    fresnel._getPendingTasks(new Number(req.param('pending_count') || 10),
+                            pendingOffset = new Number(req.param('pending_offset') || 0),
+                            function(tasks) {
         var taskIds = tasks.map(function(task) {
             return task[0];
         });
@@ -83,7 +127,9 @@ app.get('/', function(req, res) {
         }
     });
 
-    fresnel._getQueuedTasks(10, function(tasks) {
+    fresnel._getQueuedTasks(new Number(req.param('queued_count') || 10),
+                            queuedOffset = new Number(req.param('queued_offset') || 0),
+                            function(tasks) {
         var taskIds = tasks.map(function(task) {
             return task[0];
         });
@@ -99,7 +145,9 @@ app.get('/', function(req, res) {
         }
     });
 
-    fresnel._getFutureTasks(10, function(tasks) {
+    fresnel._getFutureTasks(new Number(req.param('future_count') || 10),
+                            futureOffset = new Number(req.param('future_offset') || 0),
+                            function(tasks) {
         var taskIds = tasks.map(function(task) {
             return task[0];
         });
@@ -115,7 +163,9 @@ app.get('/', function(req, res) {
         }
     });
 
-    fresnel.getErroredOutTasks(10, function(tasks) {
+    fresnel.getErroredOutTasks(new Number(req.param('failed_count') || 10),
+                                failedOffset = new Number(req.param('failed_offset') || 0),
+                                function(tasks) {
         var taskIds = tasks.map(function(task) {
             return task[0];
         });

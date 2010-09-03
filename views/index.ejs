@@ -6,7 +6,7 @@
 
 <% if (pendingTasks.length > 0) { %>
 <h2>Pending</h2>
-<p class="annotation">Showing 0-<%= pendingTasks.length %> of <%= pendingCount %></p>
+<p class="paging"><%- paginator("pending", pendingOffset, pendingTasks.length, pendingCount) %></p>
 <table id="pending" class="taskList">
 <tr>
     <th>Type</th>
@@ -31,7 +31,7 @@
 
 <% if (queuedTasks.length > 0) { %>
 <h2>Queued</h2>
-<p class="annotation">Showing 0-<%= queuedTasks.length %> of <%= queuedCount %></p>
+<p class="paging"><%- paginator("queued", queuedOffset, queuedTasks.length, queuedCount) %></p>
 <table id="pending" class="taskList">
 <tr>
     <th>Type</th>
@@ -56,7 +56,7 @@
 
 <% if (futureTasks.length > 0) { %>
 <h2>Future Tasks</h2>
-<p class="annotation">Showing 0-<%= futureTasks.length %> of <%= futureCount %></p>
+<p class="paging"><%- paginator("future", futureOffset, futureTasks.length, futureCount) %></p>
 <table id="pending" class="taskList">
 <tr>
     <th>Type</th>
@@ -83,7 +83,7 @@
 
 <% if (failedTasks.length > 0) { %>
 <h2>Failed</h2>
-<p class="annotation">Showing 0-<%= failedTasks.length %> of <%= failedCount %></p>
+<p class="paging"><%- paginator("failed", failedOffset, failedTasks.length, failedCount) %></p>
 <table id="pending" class="taskList">
 <tr>
     <th>Type</th>
