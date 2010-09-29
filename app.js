@@ -4,10 +4,10 @@
  */
 
 var express = require('express'),
-    Fresnel = require('fresnel').Fresnel;
+    Harrison = require('harrison').Harrison;
 
 var app = module.exports = express.createServer();
-var fresnel = new Fresnel();
+var harrison = new Harrison();
 
 // Configuration
 
@@ -79,7 +79,7 @@ app.get('/', function(req, res) {
 
     var deferred = new DeferredList();
 
-    deferred.add(fresnel.getPendingCount(function(count) {
+    deferred.add(harrison.getPendingCount(function(count) {
         pendingCount = count;
         deferred.done();
     });
@@ -89,27 +89,27 @@ app.get('/', function(req, res) {
     deferred.addCallback(render);
     */
 
-    fresnel.getPendingCount(function(count) {
+    harrison.getPendingCount(function(count) {
         pendingCount = count;
         render();
     });
 
-    fresnel.getUnbufferedQueueLength(function(count) {
+    harrison.getUnbufferedQueueLength(function(count) {
         queuedCount = count;
         render();
     });
 
-    fresnel.getReservoirSize(function(count) {
+    harrison.getReservoirSize(function(count) {
         futureCount = count;
         render();
     });
 
-    fresnel.getFailCount(function(count) {
+    harrison.getFailCount(function(count) {
         failedCount = count;
         render();
     });
 
-    fresnel._getPendingTasks(new Number(req.param('pending_count') || 10),
+    harrison._getPendingTasks(new Number(req.param('pending_count') || 10),
                             pendingOffset = new Number(req.param('pending_offset') || 0),
                             function(tasks) {
         var taskIds = tasks.map(function(task) {
@@ -117,7 +117,7 @@ app.get('/', function(req, res) {
         });
 
         if (taskIds.length > 0) {
-            fresnel._getDefinitions(taskIds, function(defs) {
+            harrison._getDefinitions(taskIds, function(defs) {
                 pendingTasks = defs;
                 render();
             });
@@ -127,7 +127,7 @@ app.get('/', function(req, res) {
         }
     });
 
-    fresnel._getQueuedTasks(new Number(req.param('queued_count') || 10),
+    harrison._getQueuedTasks(new Number(req.param('queued_count') || 10),
                             queuedOffset = new Number(req.param('queued_offset') || 0),
                             function(tasks) {
         var taskIds = tasks.map(function(task) {
@@ -135,7 +135,7 @@ app.get('/', function(req, res) {
         });
 
         if (taskIds.length > 0) {
-            fresnel._getDefinitions(taskIds, function(defs) {
+            harrison._getDefinitions(taskIds, function(defs) {
                 queuedTasks = defs;
                 render();
             });
@@ -145,7 +145,7 @@ app.get('/', function(req, res) {
         }
     });
 
-    fresnel._getFutureTasks(new Number(req.param('future_count') || 10),
+    harrison._getFutureTasks(new Number(req.param('future_count') || 10),
                             futureOffset = new Number(req.param('future_offset') || 0),
                             function(tasks) {
         var taskIds = tasks.map(function(task) {
@@ -153,7 +153,7 @@ app.get('/', function(req, res) {
         });
 
         if (taskIds.length > 0) {
-            fresnel._getDefinitions(taskIds, function(defs) {
+            harrison._getDefinitions(taskIds, function(defs) {
                 futureTasks = defs;
                 render();
             });
@@ -163,7 +163,7 @@ app.get('/', function(req, res) {
         }
     });
 
-    fresnel.getErroredOutTasks(new Number(req.param('failed_count') || 10),
+    harrison.getErroredOutTasks(new Number(req.param('failed_count') || 10),
                                 failedOffset = new Number(req.param('failed_offset') || 0),
                                 function(tasks) {
         var taskIds = tasks.map(function(task) {
@@ -171,7 +171,7 @@ app.get('/', function(req, res) {
         });
 
         if (taskIds.length > 0) {
-            fresnel._getDefinitions(taskIds, function(defs) {
+            harrison._getDefinitions(taskIds, function(defs) {
                 // TODO wrap this into the task definition when a task errors out
                 for (var i=0; i < defs.length; i++) {
                     defs[i].failedAt = new Date(new Number(tasks[i][1])).toISOString();
@@ -188,7 +188,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/tasks/:id', function(req, res) {
-    fresnel._getDefinition(req.params.id, function(task) {
+    harrison._getDefinition(req.params.id, function(task) {
         var lastError;
 
         var render = function() {
@@ -201,7 +201,7 @@ app.get('/tasks/:id', function(req, res) {
         };
 
         if (task.attempts > 0) {
-            fresnel.getLastError(req.params.id, function(error) {
+            harrison.getLastError(req.params.id, function(error) {
                 lastError = error;
                 render();
             });

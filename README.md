@@ -1,10 +1,16 @@
-# Fresnel
+# Harrison
 
-Fresnel is an offline task system that uses Redis and Node.js to keep track of
+Harrison is an offline task system that uses Redis and Node.js to keep track of
 tasks and push them out to ancillary worker processes. It is inspired by
 [Resque](http://github.com/defunkt/resque), [Flickr's Offline Task
 system(s)](http://code.flickr.com/blog/2008/09/26/flickr-engineers-do-it-offline/),
 and others.
+
+Harrison is named for [John
+Harrison](http://en.wikipedia.org/wiki/John_Harrison), creator of the
+[Longitude Clocks](http://en.wikipedia.org/wiki/Marine_chronometer), his
+attempt to win the [Longitude
+Prize](http://en.wikipedia.org/wiki/Longitude_prize).
 
 ## Design Goals
 
@@ -75,7 +81,7 @@ and seeing whether a matching task has already been scheduled (and not yet run).
 ## Redis Keys
 
 The following Redis data structures are used (prefixed with a user-defined
-value, `fresnel` by default):
+value, `harrison` by default):
 
 * `next.task.id` - string value containing the maximum task id, suitable for
   `INCR`ing.
@@ -89,7 +95,7 @@ value, `fresnel` by default):
 * `reservoir` - sorted set containing ids of tasks scheduled for the future
   (`scheduledFor` > now) (sort key = `scheduledFor`)
 * `failed` - sorted set containing ids of failed tasks (sort key = `attempts`)
-* `pending` - sorted set containing ids of reserved (in Fresnel's local buffer)
+* `pending` - sorted set containing ids of reserved (in Harrison's local buffer)
   tasks (sort key = `reservedAt`)
 * `error` - set containing tasks that passed the retry limit
 * `invalid` - set containing ids of invalid tasks (invalid JSON, etc.)
@@ -120,7 +126,7 @@ TDB
 
 ## Mapping Tasks to Workers
 
-    fresnel.WORKER_MAP = {
+    harrison.WORKER_MAP = {
         "backfill": {
             "href": "http://localhost:8080/jobs/backfill",
             "concurrency": 10
@@ -136,7 +142,7 @@ TDB
 
 The following actions need to occur on a regular basis:
 
-* buffering waiting tasks into `pending` and Fresnel's local queue
+* buffering waiting tasks into `pending` and Harrison's local queue
 * running locally buffered tasks
 * draining ready tasks from the reservoir to the main queue
 * moving failed tasks (retry limit exceeded) to `error`
@@ -161,7 +167,7 @@ The concurrency of the following operations is configurable:
 
 ## Dependencies
 
-Fresnel has the following dependencies:
+Harrison has the following dependencies:
 
 * Node.js >= 1.100
 * Redis 2.0.0RC1+
@@ -182,4 +188,4 @@ Follow the instructions for hashlib to add it to Node's `require.path`.
 
 ## Starting
 
-    $ NODE_PATH=../../fictorial/redis-node-client/lib/:lib/ node lib/fresnel.js
+    $ NODE_PATH=../../fictorial/redis-node-client/lib/:lib/ node lib/harrison.js
