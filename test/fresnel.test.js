@@ -186,11 +186,11 @@ module.exports = {
 
             fresnel._addToReservoir(taskId, new Date().getTime(), function() {
                 fresnel.migrateTasks(function() {
-                    fresnel._getQueuedTasks(10, function(tasks) {
+                    fresnel._getQueuedTasks(0, 0, function(tasks) {
                         queuedTasks = tasks;
                     });
 
-                    fresnel._getFutureTasks(10, function(tasks) {
+                    fresnel._getFutureTasks(0, 0, function(tasks) {
                         futureTasks = tasks;
                     });
                 });
@@ -347,9 +347,9 @@ module.exports = {
         }
 
         var getDefs = function() {
-                fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
-                    taskDefs = defs;
-                });
+            fresnel._getDefinitions(taskIds.slice(0, 2), function(defs) {
+                taskDefs = defs;
+            });
         }.barrier(tasks.length);
 
         tasks.forEach(function(task) {
@@ -435,9 +435,9 @@ module.exports = {
         var taskDef;
         var attempts = 5;
 
-        fresnel.createTask(randomTask(), function(taskId) {
-            fresnel._setFailureAttempts(taskId, attempts, function() {
-                fresnel._getDefinition(taskId, function(def) {
+        fresnel.createTask(randomTask(), function(task) {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -453,10 +453,10 @@ module.exports = {
         var taskDef;
         var attempts = 5;
 
-        fresnel.createTask(randomTask(), function(taskId) {
-            fresnel._setFailureAttempts(taskId, attempts, function() {
-                fresnel._incrementFailureAttempts(taskId, function() {
-                    fresnel._getDefinition(taskId, function(def) {
+        fresnel.createTask(randomTask(), function(task) {
+            fresnel._setFailureAttempts(task.id, attempts, function() {
+                fresnel._incrementFailureAttempts(task.id, function() {
+                    fresnel._getDefinition(task.id, function(def) {
                         taskDef = def;
                     });
                 });
@@ -592,11 +592,11 @@ module.exports = {
         fresnel._createDefinition(randomTask(), function(task) {
             taskId = task.id;
             fresnel._queueTask(task, scheduledFor, function() {
-                fresnel._getQueuedTasks(10, function(tasks) {
+                fresnel._getQueuedTasks(0, 0, function(tasks) {
                     queue = tasks;
                 });
 
-                fresnel._getFutureTasks(10, function(tasks) {
+                fresnel._getFutureTasks(0, 0, function(tasks) {
                     futureTasks = tasks;
                 });
             });
@@ -744,9 +744,9 @@ module.exports = {
         var taskDef;
         var task = randomTask();
 
-        fresnel.createTask(task, function(taskId) {
+        fresnel.createTask(task, function(task) {
             fresnel._executeTask(task, function() {
-                fresnel._getDefinition(taskId, function(def) {
+                fresnel._getDefinition(task.id, function(def) {
                     taskDef = def;
                 });
             });
@@ -879,7 +879,7 @@ module.exports = {
 
         fresnel.createTask(task, function() {
             fresnel._executeTask(task, function() {
-                fresnel.getFailedTasks(function(tasks) {
+                fresnel.getFailedTasks(0, 0, function(tasks) {
                     failedTasks = tasks;
                 });
             });
@@ -928,7 +928,7 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
                 fresnel._executeTask(task, function() {
-                    fresnel.getFailedTasks(function(tasks) {
+                    fresnel.getFailedTasks(0, 0, function(tasks) {
                         failedTasks = tasks;
                     });
                 });
@@ -955,7 +955,7 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
                 fresnel._executeTask(task, function() {
-                    fresnel.getErroredOutTasks(10, function(tasks) {
+                    fresnel.getErroredOutTasks(0, 0, function(tasks) {
                         erroredTasks = tasks;
                     });
                 });
@@ -964,7 +964,7 @@ module.exports = {
 
         beforeExit(function() {
             assert.equal(1, erroredTasks.length);
-            assert.equal(task.id, erroredTasks[0]);
+            assert.equal(task.id, erroredTasks[0][0]);
         });
     },
     "when tasks fail for the Nth time, they should be removed from the 'pending' set": function(assert, beforeExit) {
@@ -1061,7 +1061,7 @@ module.exports = {
         fresnel.createTask(task, function() {
             fresnel._setFailureAttempts(task.id, attempts, function() {
                 fresnel._executeTask(task, function() {
-                    fresnel.getFailedTasks(function(tasks) {
+                    fresnel.getFailedTasks(0, 0, function(tasks) {
                         failedTasks = tasks;
                     });
                 });
