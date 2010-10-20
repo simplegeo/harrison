@@ -1,8 +1,8 @@
-var Fresnel = require('fresnel').Fresnel;
+var Harrison = require('harrison').Harrison;
 
-var fresnel = new Fresnel();
+var harrison = new Harrison();
 
-fresnel.WORKER_MAP = {
+harrison.WORKER_MAP = {
     "Class": "http://localhost:8080/jobs/sample",
     "Backfill": "http://localhost:8080/jobs/backfill",
     "Load": "http://localhost:8081/",
@@ -10,25 +10,25 @@ fresnel.WORKER_MAP = {
     "*": "http://localhost:8081/"
 };
 
-fresnel.addListener('task-completed', function(task, response, time) {
+harrison.addListener('task-completed', function(task, response, time) {
     console.log(task.id + " completed in " + time + "ms.");
 });
 
-fresnel.addListener('task-error', function(task, error, time) {
+harrison.addListener('task-error', function(task, error, time) {
     console.log("task " + task.id + " errored " + task.attempts + " time(s): " + error);
 });
 
-fresnel.addListener('task-failed', function(task, error, time) {
+harrison.addListener('task-failed', function(task, error, time) {
     console.log("task " + task.id + " failed: " + error);
 });
 
-fresnel.getUnbufferedQueueLength(function(length) {
+harrison.getUnbufferedQueueLength(function(length) {
     console.log("Unbuffered tasks: " + length);
 });
 
-fresnel.getReservoirSize(function(length) {
+harrison.getReservoirSize(function(length) {
     console.log("Reservoir size: " + length);
 });
 
-fresnel.processTasks();
+harrison.processTasks();
 console.log("Task runner started.");

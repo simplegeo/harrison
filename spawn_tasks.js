@@ -1,6 +1,6 @@
-var Fresnel = require('fresnel').Fresnel;
+var Harrison = require('harrison').Harrison;
 
-var fresnel = new Fresnel();
+var harrison = new Harrison();
 
 function randomTask() {
     return {
@@ -31,9 +31,9 @@ if (process.argv.length > 2) {
 }
 
 var onCompletion = function() {
-    fresnel.shutdown();
+    harrison.shutdown();
 }.barrier(taskCount);
 
 for (var i = 0; i < taskCount; i++) {
-    fresnel.createTask(randomTask(), onCompletion);
+    harrison.createTask(randomTask(), onCompletion);
 }
