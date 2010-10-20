@@ -1,0 +1,25 @@
+{
+    "name": "harrison",
+    "description": "An offline task system",
+    "version": "0.1.0",
+    "author": "SimpleGeo <nerds@simplegeo.com>",
+    "main": "./lib/harrison.js",
+    "bin": {
+        "harrison-runner": "./runner.js",
+        "harrison-listener": "./listener.js",
+        "harrison-web": "./app.js"
+    },
+    "engines": { "node": ">= 0.2.0" },
+    "dependencies": {
+        "chain-gang": "",
+        "ejs": ">= 0.2.1",
+        "express": ">= 1.0.0rc4",
+        "expresso": "",
+        "hashlib": ">= 0.0.1",
+        "redis-node-client": ">= 0.3.5mojodna"
+    },
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/simplegeo/harrison.git"
+    }
+}
