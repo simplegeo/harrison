@@ -1,0 +1,19 @@
+Source: nodejs-harrison
+Section: misc
+Priority: extra
+Uploaders: Seth Fitzsimmons <seth@simplegeo.com>
+Maintainer: SimpleGeo Nerds <nerds@simplegeo.com>
+build-Depends: nodejs (>= 0.2.1), nodejs-chain-gang (>= 0.2.2),
+               nodejs-ejs (>= 0.2.1), nodejs-express (>= 1.0.0rc4),
+               nodejs-expresso (>= 0.6.2), nodejs-hashlib (>= 0.0.1-0sg3),
+               nodejs-redis-client (>= 0.3.5mojodna), cdbs, debhelper (>= 7)
+Standards-Version: 3.9.1
+
+Package: nodejs-harrison
+Depends: nodejs (>= 0.2.1), nodejs-chain-gang (>= 0.2.2), nodejs-ejs (>= 0.2.1),
+         nodejs-express (>= 1.0.0rc4), nodejs-expresso (>= 0.6.2),
+         nodejs-hashlib (>= 0.0.1-0sg3), nodejs-redis-client (>= 0.3.5mojodna),
+         daemon, ${misc:Depends}
+Architecture: all
+Description: gate
+ http://github.com/simplegeo/harrison

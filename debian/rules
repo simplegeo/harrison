@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+# include /usr/share/cdbs/1/class/makefile.mk
+
+binary-install/nodejs-harrison::
+	for script in listener runner web; do \
+		dh_installinit -pnodejs-harrison --no-start \
+                       --name=nodejs-harrison-$$script; \
+	done
+

@@ -1,0 +1,16 @@
+# -*- mode: shell-script -*-
+# Defaults for nodejs-harrison initscript
+# sourced by /etc/init.d/nodejs-harrison-listener
+# installed at /etc/default/nodejs-harrison by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Additional options that are passed to the Daemon.
+DAEMON_OPTS=""
+
+# TODO specify listener port
+
+# Change this to `yes' to run this daemon
+RUN=no
