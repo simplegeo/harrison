@@ -1,12 +1,25 @@
 var assert = require('assert'),
     sys = require('sys'),
-    redis = require('redis-client'),
+    redis = require('redis'),
     EventEmitter = require('events').EventEmitter;
 
 var _harrison = require('harrison');
 var Harrison = _harrison.Harrison;
 
 _harrison.AUTO_CLOSE = true;
+
+/**
+ * Assert that `expected` is within `epsilon` of `actual`.
+ *
+ * @param {Number} expected
+ * @param {Number} actual
+ * @param {Number} epsilon
+ * @param {String} msg
+ * @api public
+ */
+assert.almostEqual = function(expected, actual, epsilon, msg) {
+    assert.ok(Math.abs(expected - actual) <= epsilon, msg);
+};
 
 function randomTask() {
     return {

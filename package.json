@@ -15,7 +15,7 @@
         "ejs": ">= 0.2.1",
         "express": ">= 1.0.0rc4",
         "expresso": ">= 0.6.2",
-        "redis-node-client": ">= 0.3.5mojodna"
+        "redis": ">= 0.3.7"
     },
     "repository": {
         "type": "git",
