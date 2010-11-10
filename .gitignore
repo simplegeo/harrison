@@ -1,2 +1,7 @@
 lib-cov
 doc/
+tags
+debian/files
+debian/nodejs-harrison/
+debian/*.debhelper*
+debian/*.substvars
